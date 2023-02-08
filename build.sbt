@@ -1,4 +1,4 @@
-name := "JARWikiBomb"
+name := "JARCitations"
 
 version := "0.1"
 
