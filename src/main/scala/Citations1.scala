@@ -24,11 +24,12 @@ object Citations1 {
             // .withColumn("tonode", split(col("value"), "\t").getItem(1).cast("int"))
 
         cit.createOrReplaceTempView("citations")
-        cit = spark.sql("""
+        val query1 = """
             SELECT *, SPLIT(value, '\t')[0] as fromnode, SPLIT(value, '\t')[1] as tonode 
             FROM citations 
             LIMIT 10
-            """);
+        """;
+        cit = spark.sql(query1)
         cit.show()
 
 
