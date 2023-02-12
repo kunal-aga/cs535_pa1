@@ -24,9 +24,12 @@ object Citations1 {
             // .withColumn("tonode", split(col("value"), "\t").getItem(1).cast("int"))
 
         cit.createOrReplaceTempView("citations")
-        // val sqlDF = spark.sql("SELECT *, SUBSTRING_INDEX(value, '\t', 1) as fromnode FROM citations LIMIT 10")
-        val sqlDF = spark.sql("SELECT *, SPLIT(value, '\t')[0] as fromnode FROM citations LIMIT 10")
-        sqlDF.show()
+        cit = spark.sql("""
+            SELECT *, SPLIT(value, '\t')[0] as fromnode, SPLIT(value, '\t')[1] as tonode 
+            FROM citations 
+            LIMIT 10
+            """)
+        cit.show()
 
 
         cit.printSchema()
