@@ -20,20 +20,19 @@ object Citations1 {
         println(s"Filtered lines count: $countFil")
 
         // val splitDf = udf(split)
-        // cit = cit.withColumn("fromnode", splitDf(col("value"), "\t").getItem(0).cast("int"))
+        val citcleaned = cit.withColumn("fromnode", split(col("value"), "\t").getItem(0).cast("int"))
             // .withColumn("tonode", split(col("value"), "\t").getItem(1).cast("int"))
 
-        cit.createOrReplaceTempView("citations")
+        // cit.createOrReplaceTempView("citations")
         // val query1 = """
         //     SELECT *, SPLIT(value, '\t')[0] as fromnode, SPLIT(value, '\t')[1] as tonode 
         //     FROM citations 
         //     LIMIT 10
         // """;
         // cit = spark.sql(query1)
-        val citcleaned = spark.sql("SELECT *, SPLIT(value, '\t')[0] as fromnode, SPLIT(value, '\t')[1] as tonode FROM citations LIMIT 10")
+        // val citcleaned = spark.sql("SELECT *, SPLIT(value, '\t')[0] as fromnode, SPLIT(value, '\t')[1] as tonode FROM citations LIMIT 10")
+
         citcleaned.show()
-
-
         citcleaned.printSchema()
         
         spark.stop()
