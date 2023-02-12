@@ -19,10 +19,14 @@ object Citations1 {
         val countFil = cit.count()
         println(s"Filtered lines count: $countFil")
 
-        val splitDf = udf(split)
-
-        cit = cit.withColumn("fromnode", splitDf(col("value"), "\t").getItem(0).cast("int"))
+        // val splitDf = udf(split)
+        // cit = cit.withColumn("fromnode", splitDf(col("value"), "\t").getItem(0).cast("int"))
             // .withColumn("tonode", split(col("value"), "\t").getItem(1).cast("int"))
+
+        cit.createOrReplaceTempView("citations")
+        val sqlDF = spark.sql("SELECT * FROM citations LIMIT 10")
+        sqlDF.show()
+
 
         cit.printSchema()
         
