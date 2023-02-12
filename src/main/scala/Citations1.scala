@@ -22,6 +22,10 @@ object Citations1 {
         // val countFil = cit.count()
         // println(s"Filtered lines count: $countFil")
 
+        cit.printSchema()
+
+        // val countFil = cit.filter(line => line.contains("#")).count()
+
         spark.stop()
 
     }
