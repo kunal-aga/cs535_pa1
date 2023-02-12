@@ -15,7 +15,7 @@ object Citations1 {
         println(s"Original lines count: $countOg")
 
         // cit = cit.filter(!$"value".contains("#"))
-        cit.filter(!$"value".contains("#"))
+        cit = cit.filter(!$"value".contains("#"))
         val countFil = cit.count()
         println(s"Filtered lines count: $countFil")
 
