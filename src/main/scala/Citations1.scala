@@ -8,7 +8,7 @@ object Citations1 {
         import spark.implicits._
         
         // Read from HDFS
-        val cit = spark.read.textFile("hdfs:///pa1/citations.txt")
+        var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
         cit.printSchema()
 
         val countOg = cit.count()
