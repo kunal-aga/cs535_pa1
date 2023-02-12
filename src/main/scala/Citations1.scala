@@ -21,7 +21,8 @@ object Citations1 {
 
         // val splitDf = udf(split)
         val citcleaned = cit.withColumn("fromnode", split(col("value"), "\t").getItem(0).cast("int"))
-            // .withColumn("tonode", split(col("value"), "\t").getItem(1).cast("int"))
+            .withColumn("tonode", split(col("value"), "\t").getItem(1).cast("int"))
+            .drop("value")
 
         // cit.createOrReplaceTempView("citations")
         // val query1 = """
