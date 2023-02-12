@@ -28,7 +28,7 @@ object Citations1 {
             SELECT *, SPLIT(value, '\t')[0] as fromnode, SPLIT(value, '\t')[1] as tonode 
             FROM citations 
             LIMIT 10
-            """)
+            """);
         cit.show()
 
 
