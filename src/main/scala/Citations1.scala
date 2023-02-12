@@ -30,11 +30,11 @@ object Citations1 {
         //     LIMIT 10
         // """;
         // cit = spark.sql(query1)
-        cit = spark.sql("SELECT *, SPLIT(value, '\t')[0] as fromnode, SPLIT(value, '\t')[1] as tonode FROM citations LIMIT 10")
-        cit.show()
+        val citcleaned = spark.sql("SELECT *, SPLIT(value, '\t')[0] as fromnode, SPLIT(value, '\t')[1] as tonode FROM citations LIMIT 10")
+        citcleaned.show()
 
 
-        cit.printSchema()
+        citcleaned.printSchema()
         
         spark.stop()
 
