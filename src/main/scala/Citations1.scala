@@ -1,11 +1,13 @@
 import org.apache.spark.sql.SparkSession
-import spark.implicits._
 
 object Citations1 {
 
     def main(args: Array[String]): Unit = {
  
         val spark = SparkSession.builder.appName("Citations1").getOrCreate()
+        import spark.implicits._
+        
+        // Read from HDFS
         val cit = spark.read.textFile("hdfs:///pa1/citations.txt")
         cit.printSchema()
 
