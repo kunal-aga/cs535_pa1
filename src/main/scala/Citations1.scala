@@ -25,7 +25,7 @@ object Citations1 {
 
         cit.createOrReplaceTempView("citations")
         // val sqlDF = spark.sql("SELECT *, SUBSTRING_INDEX(value, '\t', 1) as fromnode FROM citations LIMIT 10")
-        val sqlDF = spark.sql("SELECT *, SPLIT(value, '\t') as fromnode FROM citations LIMIT 10")
+        val sqlDF = spark.sql("SELECT *, SPLIT(value, '\t')[0] as fromnode FROM citations LIMIT 10")
         sqlDF.show()
 
 
