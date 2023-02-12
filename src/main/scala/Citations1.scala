@@ -1,4 +1,5 @@
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
 
 object Citations1 {
 
@@ -19,7 +20,7 @@ object Citations1 {
         println(s"Filtered lines count: $countFil")
 
         cit = cit.withColumn("fromnode", split(col("value"), "\t").getItem(0).cast("int"))
-            .withColumn("tonode", split(col("value"), "\t").getItem(1).cast("int"))
+            // .withColumn("tonode", split(col("value"), "\t").getItem(1).cast("int"))
 
         cit.printSchema()
         
