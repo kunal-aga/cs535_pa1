@@ -14,10 +14,15 @@ object Citations1 {
         val countOg = cit.count()
         println(s"Original lines count: $countOg")
 
-        val filteredCit = cit.filter(!$"value".contains("#"))
-        val countFil = filteredCit.count()
+        val cit = cit.filter(!$"value".contains("#"))
+        val countFil = cit.count()
         println(s"Filtered lines count: $countFil")
 
+        val cit = cit.withColumn("fromnode", split(col("value"), "\t").getItem(0).cast("int"))
+            .withColumn("tonode", split(col("value"), "\t").getItem(1).cast("int"))
+
+        cit.printSchema()
+        
         spark.stop()
 
     }
