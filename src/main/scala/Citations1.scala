@@ -11,14 +11,14 @@ object Citations1 {
         // val numBs = logData.filter(line => line.contains("b")).count()
         // println(s"Lines with a: $numAs, Lines with b: $numBs")
         // spark.stop()
-
+ 
         val spark = SparkSession.builder.appName("Citations1").getOrCreate()
         val cit = spark.read.textFile("hdfs:///pa1/citations.txt")
 
         val countOg = cit.count()
         println(s"Original lines count: $countOg")
 
-        val filteredCit = cit.filter(!$"value".contains("#"))
+        val filteredCit = cit.filter(!"value".contains("#"))
         val countFil = cit.count()
         println(s"Filtered lines count: $countFil")
 
