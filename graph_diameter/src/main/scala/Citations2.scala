@@ -20,7 +20,7 @@ object Citations2 {
 
         citcleaned.createOrReplaceTempView("citations")
 
-        query = """
+        val query = """
             WITH data AS (
                 SELECT *
                 FROM (VALUES (1), (2), (3), (4), (5)) AS t(col)
