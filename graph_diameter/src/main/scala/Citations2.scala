@@ -38,12 +38,12 @@ object Citations2 {
 
         // g(1)
         val queryg1 = """
-            SELECT *
+            SELECT dc.a, dc.b
             FROM distComb AS dc
             LEFT JOIN citations AS c
                 ON (c.a = dc.a AND c.b = dc.b)
                     OR (c.a = dc.b AND c.b = dc.a)
-            
+            WHERE c.a IS NOT NULL
         """;
         val g1 = spark.sql(queryg1)
         g1.show()
