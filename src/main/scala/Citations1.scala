@@ -32,7 +32,7 @@ object Citations1 {
         val pdcleaned = pd.withColumn("nodeid", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("pdate", split(col("value"), "\t").getItem(1))
             .drop("value")
-        val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "\t").getItem(0).cast("int"))
+        val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int"))
         pdcleaned2.show()
         pdcleaned2.printSchema()
 
