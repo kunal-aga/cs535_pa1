@@ -87,7 +87,7 @@ object Citations1 {
 
         // Write output to HDFS
         val outputPath = "hdfs:///pa1/output_01/graph_density.txt"
-        graph_density_2.coalesce(1,true).saveAsTextFile(outputPath)
+        graph_density_2.coalesce(1).saveAsTextFile(outputPath)
 
         spark.stop()
     }
