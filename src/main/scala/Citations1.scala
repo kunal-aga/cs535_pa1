@@ -34,7 +34,7 @@ object Citations1 {
         pdcleaned2.show()
         pdcleaned2.printSchema()
 
-        // Crreate views
+        // Crreate views for Spark SQL
         citcleaned.createOrReplaceTempView("citations")
         pdcleaned2.createOrReplaceTempView("pdates")
 
@@ -85,7 +85,10 @@ object Citations1 {
         val graph_density_2 = spark.sql(query2)
         graph_density_2.show()        
 
-        spark.stop()
+        // Write output to HDFS
+        outputPath = "hdfs:///pa1/output_01/graph_density.txt"
+        graph_density_2.coalesce(1,true).saveAsTextFile(outputPath)
 
+        spark.stop()
     }
 }
