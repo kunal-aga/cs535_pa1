@@ -39,13 +39,34 @@ object Citations1 {
         pdcleaned2.createOrReplaceTempView("pdates")
 
         val query1 = """
-            SELECT *
-            FROM citations 
-            LIMIT 10
+            SELECT
+                nodes.pyear
+                ,n_nodes_py
+                ,n_edges_py
+            FROM (
+                SELECT 
+                    pyear
+                    ,COUNT(nodeid) AS n_nodes_py
+                FROM pdates AS pd
+                GROUP BY pyear
+            ) AS nodes
+            LEFT JOIN (
+                SELECT 
+                    pyear
+                    ,COUNT(fromnode) AS n_edges_py
+                FROM(
+                    SELECT *
+                    FROM citations AS c
+                    LEFT JOIN pdates AS pd
+                        ON c.fromnode = pd.nodeid
+                ) AS dfj
+                GROUP BY pyear
+            ) AS edges
+                ON nodes.pyear = edges.pyear
+            ORDER BY nodes.pyear
         """;
-        val c1 = spark.sql(query1)
-        // val citcleaned = spark.sql("SELECT *, SPLIT(value, '\t')[0] as fromnode, SPLIT(value, '\t')[1] as tonode FROM citations LIMIT 10")
-        c1.show()
+        val graph_density_1 = spark.sql(query1)
+        graph_density_1.show()
 
 
 
