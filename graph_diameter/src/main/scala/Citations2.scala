@@ -18,6 +18,22 @@ object Citations2 {
         citcleaned.show()
         citcleaned.printSchema()
 
+        citcleaned.createOrReplaceTempView("citations")
+
+        query = """
+            WITH data AS (
+                SELECT *
+                FROM (VALUES (1), (2), (3), (4), (5)) AS t(col)
+            )
+            SELECT d1.col AS col1, d2.col AS col2
+            FROM data d1
+            JOIN data d2 
+                ON d1.col < d2.col
+        """;
+        val distComb = spark.sql(query)
+        distComb.show()
+        distComb.createOrReplaceTempView("distComb")
+
         // // Read published-dates from HDFS
         // var pd = spark.read.textFile("hdfs:///pa1/published-dates.txt")
         // pd = pd.filter(!$"value".contains("#"))
