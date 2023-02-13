@@ -41,8 +41,8 @@ object Citations2 {
             SELECT *
             FROM distComb AS dc
             LEFT JOIN citations AS c
-                ON (c.a = t.a AND c.b = t.b)
-                    OR (c.a = t.b AND c.b = t.a)
+                ON (c.a = dc.a AND c.b = dc.b)
+                    OR (c.a = dc.b AND c.b = dc.a)
             
         """;
         val g1 = spark.sql(queryg1)
