@@ -17,15 +17,17 @@ object Citations2 {
             .drop("value")
         citcleaned.show()
         citcleaned.printSchema()
-
         citcleaned.createOrReplaceTempView("citations")
 
+        // sample query for forming distinct combinations 
         val query = """
             WITH data AS (
                 SELECT *
                 FROM (VALUES (1), (2), (3), (4), (5)) AS t(col)
             )
-            SELECT d1.col AS col1, d2.col AS col2
+            SELECT 
+                d1.col AS a
+                ,d2.col AS b
             FROM data d1
             JOIN data d2 
                 ON d1.col < d2.col
@@ -34,20 +36,19 @@ object Citations2 {
         distComb.show()
         distComb.createOrReplaceTempView("distComb")
 
-        // // Read published-dates from HDFS
-        // var pd = spark.read.textFile("hdfs:///pa1/published-dates.txt")
-        // pd = pd.filter(!$"value".contains("#"))
-        // // create columns
-        // val pdcleaned = pd.withColumn("nodeid", split(col("value"), "\t").getItem(0).cast("int"))
-        //     .withColumn("pdate", split(col("value"), "\t").getItem(1))
-        //     .drop("value")
-        // val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int"))
-        // pdcleaned2.show()
-        // pdcleaned2.printSchema()
+        // g(1)
+        val queryg1 = """
+            SELECT *
+            FROM distComb AS dc
+            LEFT JOIN citations AS c
+                ON (c.a = t.a AND c.b = t.b)
+                    OR (c.a = t.b AND c.b = t.a)
+            
+        """;
+        val g1 = spark.sql(queryg1)
+        g1.show()
+        g1.createOrReplaceTempView("g1")
 
-        // Crreate views for Spark SQL
-        // citcleaned.createOrReplaceTempView("citations")
-        // pdcleaned2.createOrReplaceTempView("pdates")
 
         spark.stop()
     }
