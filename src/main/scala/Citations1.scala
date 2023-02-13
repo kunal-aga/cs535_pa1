@@ -38,6 +38,7 @@ object Citations1 {
         citcleaned.createOrReplaceTempView("citations")
         pdcleaned2.createOrReplaceTempView("pdates")
 
+        // n(e) and e(t) per year
         val query1 = """
             SELECT
                 nodes.pyear
@@ -67,8 +68,22 @@ object Citations1 {
         """;
         val graph_density_1 = spark.sql(query1)
         graph_density_1.show()
-
-
+        graph_density_1.createOrReplaceTempView("graph_density_1")
+        
+        // n(e) and e(t) per year rolling
+        val query2 = """
+            SELECT 
+                gd1.pyear AS year
+                ,SUM(gd2.n_nodes_py) AS n_nodes
+                ,SUM(gd2.n_edges_py) AS n_edges
+            FROM graph_density_1 AS gd1
+            LEFT JOIN graph_density_1 AS gd2
+                ON gd1.pyear >= gd2.pyear
+            GROUP BY gd1.pyear
+            ORDER BY gd1.pyear
+        """;
+        val graph_density_2 = spark.sql(query2)
+        graph_density_2.show()        
 
         spark.stop()
 
