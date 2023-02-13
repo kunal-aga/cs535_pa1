@@ -48,7 +48,24 @@ object Citations2 {
         val g1 = spark.sql(queryg1)
         g1.show()
         g1.createOrReplaceTempView("g1")
+        val n_g1 = g1.count()
+        println(s"Number of nodes in g(1): $n_g1")
 
+        // g(2)
+        val queryg2 = """
+            WITH remainingComb AS (
+                SELECT *
+                FROM distComb AS dc
+                LEFT JOIN g1
+                    ON dc.a = g1.a AND dc.b = g1.b
+                WHERE g1.a IS NULL
+            )
+            SELECT *
+            FROM remainingComb
+        """;
+        val g2 = spark.sql(queryg2)
+        g2.show()
+        g2.createOrReplaceTempView("g2")
 
         spark.stop()
     }
