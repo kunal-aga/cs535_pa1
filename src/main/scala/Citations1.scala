@@ -10,12 +10,7 @@ object Citations1 {
         
         // Read Citations from HDFS
         var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
-        // filter comments
-        // val countOg = cit.count()
-        // println(s"Original lines count: $countOg")
         cit = cit.filter(!$"value".contains("#"))
-        // val countFil = cit.count()
-        // println(s"Filtered lines count: $countFil")
         // create columns
         val citcleaned = cit.withColumn("fromnode", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("tonode", split(col("value"), "\t").getItem(1).cast("int"))
@@ -70,7 +65,7 @@ object Citations1 {
         graph_density_1.show()
         graph_density_1.createOrReplaceTempView("graph_density_1")
         
-        // n(e) and e(t) per year rolling
+        // n(e) and e(t) rolling sum per year
         val query2 = """
             SELECT 
                 gd1.pyear AS year
@@ -86,9 +81,9 @@ object Citations1 {
         graph_density_2.show()        
 
         // Write output to HDFS
-        val outputPath = "hdfs:///pa1/output_01/graph_density.txt"
-        // graph_density_2.coalesce(1).saveAsTextFile(outputPath)
+        val outputPath = "hdfs:///pa1/graph_density_01"
         graph_density_2.coalesce(1).write.format("csv").save(outputPath)
+
         spark.stop()
     }
 }
