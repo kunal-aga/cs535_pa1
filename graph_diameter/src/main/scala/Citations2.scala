@@ -35,7 +35,7 @@ object Citations2 {
 
         // Seq (array) to save stats per year
         // var resultData = Seq(Row(0, 0, 0))
-        var resultData;
+        var resultData = NULL;
 
         for( year <- 1992 to 1992)
         {
