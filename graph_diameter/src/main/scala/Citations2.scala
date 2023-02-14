@@ -153,7 +153,7 @@ object Citations2 {
         g4.show()
         g4.createOrReplaceTempView("g4")
         val n_g4 = g4.count()
-        // val n_g42: Nothing = g4.count()
+        val n_g42: Nothing = g4.count().toInt
         println(s"Number of nodes in g(4): $n_g4")
 
         // create output
