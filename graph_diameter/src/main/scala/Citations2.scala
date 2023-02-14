@@ -79,7 +79,7 @@ object Citations2 {
         // g(3)
         val queryg3 = """
             WITH remainingComb AS (
-                SELECT dc.a, dc.b
+                SELECT *
                 FROM distComb AS dc
                 LEFT JOIN g1
                     ON dc.a = g1.a AND dc.b = g1.b
