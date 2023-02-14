@@ -69,11 +69,34 @@ object Citations2 {
                         OR ((c1.b = c2.a OR c1.b = c2.b) AND (c1.b != rc.a)))
                     AND (c2.a = rc.b OR c2.b = rc.b)
             WHERE c2.a IS NOT NULL
-
         """;
         val g2 = spark.sql(queryg2)
         g2.show()
         g2.createOrReplaceTempView("g2")
+        val n_g2 = g2.count()
+        println(s"Number of nodes in g(2): $n_g2")
+
+        // g(3)
+        val queryg3 = """
+            WITH remainingComb AS (
+                SELECT dc.a, dc.b
+                FROM distComb AS dc
+                LEFT JOIN g1
+                    ON dc.a = g1.a AND dc.b = g1.b
+                LEFT JOIN g2
+                    ON dc.a = g2.a AND dc.b = g2.b
+                WHERE g1.a IS NULL OR g2.a IS NULL
+            )
+            SELECT *
+            FROM remainingComb AS rc
+            
+        """;
+        val g3 = spark.sql(queryg3)
+        g3.show()
+        g3.createOrReplaceTempView("g3")
+        val n_g3 = g3.count()
+        println(s"Number of nodes in g(3): $n_g3")
+
 
         spark.stop()
     }
