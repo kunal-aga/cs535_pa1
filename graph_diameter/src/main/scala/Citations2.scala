@@ -50,7 +50,7 @@ object Citations2 {
         val g1 = spark.sql(queryg1)
         g1.show()
         g1.createOrReplaceTempView("g1")
-        val n_g1 = g1.count()
+        val n_g1 = g1.count().toInt
         println(s"Number of nodes in g(1): $n_g1")
 
         // g(2)
@@ -74,7 +74,7 @@ object Citations2 {
         val g2 = spark.sql(queryg2)
         g2.show()
         g2.createOrReplaceTempView("g2")
-        val n_g2 = g2.count()
+        val n_g2 = g2.count().toInt
         println(s"Number of nodes in g(2): $n_g2")
 
         // g(3)
@@ -108,7 +108,7 @@ object Citations2 {
         val g3 = spark.sql(queryg3)
         g3.show()
         g3.createOrReplaceTempView("g3")
-        val n_g3 = g3.count()
+        val n_g3 = g3.count().toInt
         println(s"Number of nodes in g(3): $n_g3")
 
         // g(4)
@@ -152,27 +152,22 @@ object Citations2 {
         val g4 = spark.sql(queryg4)
         g4.show()
         g4.createOrReplaceTempView("g4")
-        val n_g4 = g4.count()
+        val n_g4 = g4.count().toInt
         // val n_g42: Nothing = g4.count().toInt
         println(s"Number of nodes in g(4): $n_g4")
 
         // create output
         // case class TestIntConversion(scalaInt: scala.Int)
         val structureData = Seq(
-            // Row("test", g1, g2, g3, g4)
-            Row("test", n_g4)
-            // Row("test", 1, 2, 3, 4)
+            Row("test", n_g1, n_g2, n_g3, n_g4)
         )
         val structureSchema = new StructType()
             .add("year",StringType)
-            .add("G1",LongType)
-            // .add("G2",IntegerType)
-            // .add("G3",IntegerType)
-            // .add("G4",IntegerType)
+            .add("G1",IntegerType)
+            .add("G2",IntegerType)
+            .add("G3",IntegerType)
+            .add("G4",IntegerType)
         val result = spark.createDataFrame(spark.sparkContext.parallelize(structureData), structureSchema)
-
-        // val result = Seq(("test", g1)).toDF("year","G1")
-
         result.printSchema()
         result.show()
 
