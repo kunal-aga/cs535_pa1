@@ -85,7 +85,7 @@ object Citations2 {
                     ON dc.a = g1.a AND dc.b = g1.b
                 LEFT JOIN g2
                     ON dc.a = g2.a AND dc.b = g2.b
-                WHERE g1.a IS NULL OR g2.a IS NULL
+                WHERE g1.a IS NULL AND g2.a IS NULL
             )
             SELECT *
             FROM remainingComb AS rc
