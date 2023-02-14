@@ -195,11 +195,11 @@ object Citations2 {
 
             // Unpersist cached dataframes
             // distComb = distComb.unpersist()
-            remainingComb = remainingComb.unpersist()
-            cit_year = cit_year.unpersist()
-            g1 = g1.unpersist()
-            g2 = g2.unpersist()
-            g3 = g3.unpersist()
+            remainingComb.unpersist()
+            cit_year.unpersist()
+            g1.unpersist()
+            g2.unpersist()
+            g3.unpersist()
             // g4 = g4.unpersist()
 
             // Append stats to result seq
