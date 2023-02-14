@@ -33,11 +33,11 @@ object Citations2 {
         pdcleaned2.printSchema()
         pdcleaned2.createOrReplaceTempView("pdates")
 
-        for( year <- 1992 to 1994)
+        for( year <- 1992 to 1993)
         {
             println(s"********* Year : $year **************")
 
-            // sample query for forming distinct combinations 
+            // Distinct node combinations 
             // val query = """
             //     WITH data AS (
             //         SELECT *
@@ -50,48 +50,45 @@ object Citations2 {
             //     JOIN data d2 
             //         ON d1.col < d2.col
             // """;
-            // val query = s"""
-            //     WITH nodes AS (
-            //         SELECT DISTINCT nodeid
-            //         FROM pdates
-            //         WHERE pyear <= $year
-            //     )
-            //     SELECT 
-            //         n1.nodeid AS a
-            //         ,n2.nodeid AS b
-            //     FROM nodes n1
-            //     JOIN nodes n2 
-            //         ON n1.nodeid < n2.nodeid
-            // """;
             val query = s"""
-                SELECT DISTINCT nodeid
-                FROM pdates
-                WHERE pyear <= $year
-            """;            
+                WITH nodes AS (
+                    SELECT DISTINCT nodeid
+                    FROM pdates
+                    WHERE pyear <= $year
+                )
+                SELECT 
+                    n1.nodeid AS a
+                    ,n2.nodeid AS b
+                FROM nodes n1
+                JOIN nodes n2 
+                    ON n1.nodeid < n2.nodeid
+            """;
             val distComb = spark.sql(query)
             distComb.show()
             distComb.createOrReplaceTempView("distComb")
             val n_nodes = distComb.count().toInt
             println(s"Number of node combinations in $year : $n_nodes")
 
+            // g(1)
+            val queryg1 = """
+                SELECT dc.a, dc.b
+                FROM distComb AS dc
+                LEFT JOIN citations AS c
+                    ON (c.a = dc.a AND c.b = dc.b)
+                        OR (c.a = dc.b AND c.b = dc.a)
+                WHERE c.a IS NOT NULL
+            """;
+            val g1 = spark.sql(queryg1)
+            g1.show()
+            g1.createOrReplaceTempView("g1")
+            val n_g1 = g1.count().toInt
+            println(s"Number of nodes in g(1) in $year year: $n_g1")
+
         }
 
 
 
-        // // g(1)
-        // val queryg1 = """
-        //     SELECT dc.a, dc.b
-        //     FROM distComb AS dc
-        //     LEFT JOIN citations AS c
-        //         ON (c.a = dc.a AND c.b = dc.b)
-        //             OR (c.a = dc.b AND c.b = dc.a)
-        //     WHERE c.a IS NOT NULL
-        // """;
-        // val g1 = spark.sql(queryg1)
-        // g1.show()
-        // g1.createOrReplaceTempView("g1")
-        // val n_g1 = g1.count().toInt
-        // println(s"Number of nodes in g(1): $n_g1")
+
 
         // // g(2)
         // val queryg2 = """
