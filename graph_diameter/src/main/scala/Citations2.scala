@@ -35,7 +35,6 @@ object Citations2 {
 
         // Seq (array) to save stats per year
         // var resultData = Seq(Row(0, 0, 0))
-        var resultData = Seq(Row())
 
         for( year <- 1992 to 1992)
         {
@@ -114,7 +113,12 @@ object Citations2 {
             println(s"Number of nodes in g(2) in $year year: $n_g2")
 
             // Append stats to result seq
-            resultData = resultData :+ Row(year, n_g1, n_g2)
+            // resultData = resultData :+ Row(year, n_g1, n_g2)
+            if (year == 1992) {
+                var resultData = Seq(Row(year, n_g1, n_g2))
+            } else {
+                resultData = resultData :+ Row(year, n_g1, n_g2)
+            }
 
         } // for loop end
 
@@ -128,7 +132,7 @@ object Citations2 {
         val result = spark.createDataFrame(spark.sparkContext.parallelize(resultData), resultSchema)
         result.printSchema()
         result.show()
-        val outputPath = "hdfs:///pa1/graph_diameter_01"
+        val outputPath = "hdfs:///pa1/graph_diameter_02"
         result.coalesce(1).write.format("csv").save(outputPath)
 
 
