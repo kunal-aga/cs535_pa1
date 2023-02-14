@@ -170,7 +170,7 @@ object Citations2 {
             .add("G2",IntegerType)
             .add("G3",IntegerType)
             .add("G4",IntegerType)
-        val result = spark.createDataFrame(spark.sparkContext.parallelize(structureData2), structureSchema)
+        val result = spark.createDataFrame(spark.sparkContext.parallelize(structureData), structureSchema)
         result.printSchema()
         result.show()
 
