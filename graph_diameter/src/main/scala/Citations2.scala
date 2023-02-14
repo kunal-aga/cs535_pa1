@@ -28,8 +28,7 @@ object Citations2 {
         val pdcleaned = pd.withColumn("nodeid", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("pdate", split(col("value"), "\t").getItem(1))
             .drop("value")
-        val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int"))
-        // pdcleaned2.cache()
+        val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int")).persist()
         // pdcleaned2.show()
         // pdcleaned2.printSchema()
         pdcleaned2.createOrReplaceTempView("pdates")
@@ -55,7 +54,7 @@ object Citations2 {
                 JOIN nodes n2 
                     ON n1.nodeid < n2.nodeid
             """;
-            val distComb = spark.sql(query)
+            val distComb = spark.sql(query).persist()
             // distComb.show()
             distComb.createOrReplaceTempView("distComb")
             val n_nodes = spark.sql("SELECT COUNT(a) FROM distComb").first().getLong(0).toInt
@@ -69,7 +68,7 @@ object Citations2 {
                     ON c.a = pd.nodeid
                 WHERE pd.pyear <= $year
             """;
-            val cit_year = spark.sql(query2)
+            val cit_year = spark.sql(query2).persist()
             cit_year.createOrReplaceTempView("citations")
 
             // g(1)
@@ -81,7 +80,7 @@ object Citations2 {
                         OR (c.a = dc.b AND c.b = dc.a)
                 WHERE c.a IS NOT NULL
             """;
-            val g1 = spark.sql(queryg1)
+            val g1 = spark.sql(queryg1).persist()
             // g1.show()
             g1.createOrReplaceTempView("g1")
             // val n_g1 = g1.count().toInt
@@ -106,7 +105,7 @@ object Citations2 {
                         AND (c1.a = c2.a OR c1.a = c2.b OR c1.b = c2.a OR c1.b = c2.b)
                 WHERE c2.a IS NOT NULL
             """;
-            val g2 = spark.sql(queryg2)
+            val g2 = spark.sql(queryg2).persist()
             // g2.show()
             g2.createOrReplaceTempView("g2")
             // val n_g2 = g2.count().toInt
@@ -141,7 +140,7 @@ object Citations2 {
                         AND (c2.a = c3.a OR c2.a = c3.b OR c2.b = c3.a OR c2.b = c3.b)
                 WHERE c3.a IS NOT NULL             
             """;
-            val g3 = spark.sql(queryg3)
+            val g3 = spark.sql(queryg3).persist()
             // g3.show()
             g3.createOrReplaceTempView("g3")
             // val n_g3 = g3.count().toInt
@@ -192,6 +191,14 @@ object Citations2 {
             // val n_g4 = g4.count().toInt
             val n_g4 = spark.sql("SELECT COUNT(a) FROM g4").first().getLong(0).toInt + n_g3
             println(s"Number of nodes in g(4) in $year year: $n_g4")
+
+            // Unpersist cached dataframes
+            distComb = dfPersist.unpersist()
+            cit_year = cit_year.unpersist()
+            g1 = g1.unpersist()
+            g2 = g2.unpersist()
+            g3 = g3.unpersist()
+            // g4 = g4.unpersist()
 
             // Append stats to result seq
             resultData = resultData :+ Row(year, n_g1, n_g2, n_g3, n_g4)
