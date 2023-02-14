@@ -36,9 +36,9 @@ object Citations2 {
         // Seq (array) to save stats per year
         var resultData: Seq[Row] = Seq.empty[Row]
 
-        for( year <- 1992 to 1993)
+        for( year <- 1992 to 2002)
         {
-            println(s"********* Year : $year **************")
+            // println(s"********* Year : $year **************")
 
             // Distinct node combinations 
             val query = s"""
@@ -58,7 +58,7 @@ object Citations2 {
             // distComb.show()
             distComb.createOrReplaceTempView("distComb")
             val n_nodes = spark.sql("SELECT COUNT(a) FROM distComb").first().getLong(0).toInt
-            println(s"Number of node combinations in $year : $n_nodes")
+            // println(s"Number of node combinations in $year : $n_nodes")
 
             // Subsample citations only till current year
             val query2 = s"""
@@ -85,7 +85,7 @@ object Citations2 {
             g1.createOrReplaceTempView("g1")
             // val n_g1 = g1.count().toInt
             val n_g1 = spark.sql("SELECT COUNT(a) FROM g1").first().getLong(0).toInt
-            println(s"Number of nodes in g(1) in $year year: $n_g1")
+            // println(s"Number of nodes in g(1) in $year year: $n_g1")
 
             // g(2)
             val queryg2 = """
@@ -109,8 +109,8 @@ object Citations2 {
             // g2.show()
             g2.createOrReplaceTempView("g2")
             // val n_g2 = g2.count().toInt
-            val n_g2 = spark.sql("SELECT COUNT(a) FROM g2").first().getLong(0).toInt
-            println(s"Number of nodes in g(2) in $year year: $n_g2")
+            val n_g2 = spark.sql("SELECT COUNT(a) FROM g2").first().getLong(0).toInt + n_g1
+            // println(s"Number of nodes in g(2) in $year year: $n_g2")
 
             // g(3)
             val queryg3 = """
@@ -144,8 +144,8 @@ object Citations2 {
             // g3.show()
             g3.createOrReplaceTempView("g3")
             // val n_g3 = g3.count().toInt
-            val n_g3 = spark.sql("SELECT COUNT(a) FROM g3").first().getLong(0).toInt
-            println(s"Number of nodes in g(3) in $year year: $n_g3")
+            val n_g3 = spark.sql("SELECT COUNT(a) FROM g3").first().getLong(0).toInt + n_g2
+            // println(s"Number of nodes in g(3) in $year year: $n_g3")
 
             // g(4)
             val queryg4 = """
@@ -189,7 +189,7 @@ object Citations2 {
             // g4.show()
             g4.createOrReplaceTempView("g4")
             // val n_g4 = g4.count().toInt
-            val n_g4 = spark.sql("SELECT COUNT(a) FROM g4").first().getLong(0).toInt
+            val n_g4 = spark.sql("SELECT COUNT(a) FROM g4").first().getLong(0).toInt + n_g3
             println(s"Number of nodes in g(4) in $year year: $n_g4")
 
             // Append stats to result seq
