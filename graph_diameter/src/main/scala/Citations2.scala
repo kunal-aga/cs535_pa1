@@ -158,11 +158,11 @@ object Citations2 {
 
         // create output
         // case class TestIntConversion(scalaInt: scala.Int)
-        val structureData = Seq(
+        var structureData = Seq(
             Row("test", n_g1, n_g2, n_g3, n_g4)
         )
 
-        val structureData2 = structureData :+ Row("test", n_g1, n_g2, n_g3, n_g4)
+        structureData2 = structureData :+ Row("test", n_g1, n_g2, n_g3, n_g4)
 
         val structureSchema = new StructType()
             .add("year",StringType)
