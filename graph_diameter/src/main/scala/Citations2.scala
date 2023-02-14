@@ -61,7 +61,15 @@ object Citations2 {
                 WHERE g1.a IS NULL
             )
             SELECT *
-            FROM remainingComb
+            FROM remainingComb AS rc
+            LEFT JOIN citations AS c1
+                ON rc.a = c1.a OR rc.a = c1.b
+            LEFT JOIN citations AS c2
+                ON (((c1.a = c2.a OR c1.a = c2.b) AND (c1.a != rc.a))
+                        OR ((c1.b = c2.a OR c1.b = c2.b) AND (c1.b != rc.a)))
+                    AND (c2.a = rc.b OR c2.b = rc.b)
+                        
+
         """;
         val g2 = spark.sql(queryg2)
         g2.show()
