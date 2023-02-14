@@ -34,9 +34,10 @@ object Citations2 {
         pdcleaned2.createOrReplaceTempView("pdates")
 
         // Seq (array) to save stats per year
-        var resultData = Seq(Row(0, 0, 0))
+        // var resultData = Seq(Row(0, 0, 0))
+        var resultData = Seq()
 
-        for( year <- 1992 to 1993)
+        for( year <- 1992 to 1992)
         {
             println(s"********* Year : $year **************")
 
