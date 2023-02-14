@@ -17,7 +17,7 @@ object Citations2 {
         val citcleaned = cit.withColumn("a", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("b", split(col("value"), "\t").getItem(1).cast("int"))
             .drop("value")
-        citcleaned.show()
+        // citcleaned.show()
         citcleaned.printSchema()
         citcleaned.createOrReplaceTempView("citations")
 
@@ -29,7 +29,7 @@ object Citations2 {
             .withColumn("pdate", split(col("value"), "\t").getItem(1))
             .drop("value")
         val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int"))
-        pdcleaned2.show()
+        // pdcleaned2.show()
         pdcleaned2.printSchema()
         pdcleaned2.createOrReplaceTempView("pdates")
 
@@ -38,18 +38,6 @@ object Citations2 {
             println(s"********* Year : $year **************")
 
             // Distinct node combinations 
-            // val query = """
-            //     WITH data AS (
-            //         SELECT *
-            //         FROM (VALUES (1), (2), (3), (4), (5), (6)) AS t(col)
-            //     )
-            //     SELECT 
-            //         d1.col AS a
-            //         ,d2.col AS b
-            //     FROM data d1
-            //     JOIN data d2 
-            //         ON d1.col < d2.col
-            // """;
             val query = s"""
                 WITH nodes AS (
                     SELECT DISTINCT nodeid
@@ -64,25 +52,39 @@ object Citations2 {
                     ON n1.nodeid < n2.nodeid
             """;
             val distComb = spark.sql(query)
-            // distComb.show()
+            distComb.show()
             distComb.createOrReplaceTempView("distComb")
             val n_nodes = distComb.count().toInt
             println(s"Number of node combinations in $year : $n_nodes")
 
+            val n_nodes_df = spark.sql("SELECT COUNT(*) FROM distComb")
+            n_nodes_df.show()
+
+            // // Subsample citations only till current year
+            // val query2 = s"""
+            //     SELECT c.*
+            //     FROM citations_all AS c
+            //     LEFT JOIN pdates AS pd
+            //         ON c.a = pd.nodeid
+            //     WHERE pd.pyear <= $year
+            // """;
+            // val cit_year = spark.sql(query2)
+            // cit_year.createOrReplaceTempView("citations")
+
             // g(1)
-            val queryg1 = """
-                SELECT dc.a, dc.b
-                FROM distComb AS dc
-                LEFT JOIN citations AS c
-                    ON (c.a = dc.a AND c.b = dc.b)
-                        OR (c.a = dc.b AND c.b = dc.a)
-                WHERE c.a IS NOT NULL
-            """;
-            val g1 = spark.sql(queryg1)
-            // g1.show()
-            g1.createOrReplaceTempView("g1")
-            val n_g1 = g1.count().toInt
-            println(s"Number of nodes in g(1) in $year year: $n_g1")
+            // val queryg1 = """
+            //     SELECT dc.a, dc.b
+            //     FROM distComb AS dc
+            //     LEFT JOIN citations AS c
+            //         ON (c.a = dc.a AND c.b = dc.b)
+            //             OR (c.a = dc.b AND c.b = dc.a)
+            //     WHERE c.a IS NOT NULL
+            // """;
+            // val g1 = spark.sql(queryg1)
+            // // g1.show()
+            // g1.createOrReplaceTempView("g1")
+            // val n_g1 = g1.count().toInt
+            // println(s"Number of nodes in g(1) in $year year: $n_g1")
 
         }
 
