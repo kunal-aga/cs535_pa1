@@ -193,7 +193,7 @@ object Citations2 {
             println(s"Number of nodes in g(4) in $year year: $n_g4")
 
             // Unpersist cached dataframes
-            distComb = dfPersist.unpersist()
+            distComb = distComb.unpersist()
             cit_year = cit_year.unpersist()
             g1 = g1.unpersist()
             g2 = g2.unpersist()
