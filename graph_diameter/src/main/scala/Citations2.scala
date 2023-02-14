@@ -188,8 +188,7 @@ object Citations2 {
             val g4 = spark.sql(queryg4)
             // g4.show()
             g4.createOrReplaceTempView("g4")
-            val n_g4 = g4.count().toInt
-            // val n_g42: Nothing = g4.count().toInt
+            // val n_g4 = g4.count().toInt
             val n_g4 = spark.sql("SELECT COUNT(a) FROM g4").first().getLong(0).toInt
             println(s"Number of nodes in g(4) in $year year: $n_g4")
 
