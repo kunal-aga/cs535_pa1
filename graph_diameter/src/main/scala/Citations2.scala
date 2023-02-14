@@ -1,5 +1,6 @@
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.Row
 
 object Citations2 {
 
@@ -122,7 +123,7 @@ object Citations2 {
                     ON dc.a = g3.a AND dc.b = g3.b
                 WHERE g1.a IS NULL AND g2.a IS NULL AND g3.a IS NULL
             )
-            SELECT *
+            SELECT DISTINCT rc.a, rc.b
             FROM remainingComb AS rc
             LEFT JOIN citations AS c1
                 ON rc.a = c1.a OR rc.a = c1.b
@@ -152,6 +153,21 @@ object Citations2 {
         g4.createOrReplaceTempView("g4")
         val n_g4 = g4.count()
         println(s"Number of nodes in g(4): $n_g4")
+
+        // create output
+        val structureData = Seq(
+            Row("test", g1, g2, g3, g4)
+        )
+        val structureSchema = new StructType()
+            .add("year",StringType)
+            .add("G1",IntegerType)
+            .add("G2",IntegerType)
+            .add("G3",IntegerType)
+            .add("G4",IntegerType)
+
+        val result = spark.createDataFrame(spark.sparkContext.parallelize(structureData), structureSchema)
+        result.printSchema()
+        result.show()
 
         spark.stop()
     }
