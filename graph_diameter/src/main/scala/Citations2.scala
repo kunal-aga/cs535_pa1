@@ -64,10 +64,10 @@ object Citations2 {
             FROM remainingComb AS rc
             LEFT JOIN citations AS c1
                 ON rc.a = c1.a OR rc.a = c1.b
-            // LEFT JOIN citations AS c2
-            //     ON (((c1.a != rc.a) AND (c1.a = c2.a OR c1.a = c2.b))
-            //             OR ((c1.b != rc.a) AND (c1.b = c2.a OR c1.b = c2.b)))
-            //         AND (c2.a = rc.b OR c2.b = rc.b)
+            -- LEFT JOIN citations AS c2
+            --     ON (((c1.a != rc.a) AND (c1.a = c2.a OR c1.a = c2.b))
+            --             OR ((c1.b != rc.a) AND (c1.b = c2.a OR c1.b = c2.b)))
+            --         AND (c2.a = rc.b OR c2.b = rc.b)
             LEFT JOIN citations AS c2
                 ON (c2.a = rc.b OR c2.b = rc.b)
                     AND (c1.a = c2.a OR c1.a = c2.b OR c1.b = c2.a OR c1.b = c2.b)
