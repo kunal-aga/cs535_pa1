@@ -65,8 +65,8 @@ object Citations2 {
             LEFT JOIN citations AS c1
                 ON rc.a = c1.a OR rc.a = c1.b
             LEFT JOIN citations AS c2
-                ON (((c1.a = c2.a OR c1.a = c2.b) AND (c1.a != rc.a))
-                        OR ((c1.b = c2.a OR c1.b = c2.b) AND (c1.b != rc.a)))
+                ON (((c1.a != rc.a) AND (c1.a = c2.a OR c1.a = c2.b))
+                        OR ((c1.b != rc.a) AND (c1.b = c2.a OR c1.b = c2.b)))
                     AND (c2.a = rc.b OR c2.b = rc.b)
             WHERE c2.a IS NOT NULL
         """;
@@ -89,7 +89,17 @@ object Citations2 {
             )
             SELECT *
             FROM remainingComb AS rc
-            
+            LEFT JOIN citations AS c1
+                ON rc.a = c1.a OR rc.a = c1.b
+            LEFT JOIN citations AS c2
+                ON (
+                    (c1.a != rc.a) 
+                    AND ((c1.a = c2.a AND c1.b != c2.b) OR (c1.a = c2.b))
+                ) OR (
+                    (c1.b != rc.a) 
+                    AND ((c1.b = c2.a) OR (c1.b = c2.b AND c1.a != c2.a))
+                )
+                            
         """;
         val g3 = spark.sql(queryg3)
         g3.show()
