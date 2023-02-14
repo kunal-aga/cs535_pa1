@@ -35,6 +35,7 @@ object Citations2 {
 
         // Seq (array) to save stats per year
         // var resultData = Seq(Row(0, 0, 0))
+        var resultData;
 
         for( year <- 1992 to 1992)
         {
@@ -115,7 +116,7 @@ object Citations2 {
             // Append stats to result seq
             // resultData = resultData :+ Row(year, n_g1, n_g2)
             if (year == 1992) {
-                var resultData = Seq(Row(year, n_g1, n_g2))
+                resultData = Seq(Row(year, n_g1, n_g2))
             } else {
                 resultData = resultData :+ Row(year, n_g1, n_g2)
             }
