@@ -18,7 +18,7 @@ object Citations2 {
             .withColumn("b", split(col("value"), "\t").getItem(1).cast("int"))
             .drop("value")
         // citcleaned.show()
-        citcleaned.printSchema()
+        // citcleaned.printSchema()
         citcleaned.createOrReplaceTempView("citations_all")
 
         // Read published-dates from HDFS
@@ -29,14 +29,15 @@ object Citations2 {
             .withColumn("pdate", split(col("value"), "\t").getItem(1))
             .drop("value")
         val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int"))
+        // pdcleaned2.cache()
         // pdcleaned2.show()
-        pdcleaned2.printSchema()
+        // pdcleaned2.printSchema()
         pdcleaned2.createOrReplaceTempView("pdates")
 
         // Seq (array) to save stats per year
         var resultData: Seq[Row] = Seq.empty[Row]
 
-        for( year <- 1992 to 2002)
+        for( year <- 1992 to 1992)
         {
             // println(s"********* Year : $year **************")
 
