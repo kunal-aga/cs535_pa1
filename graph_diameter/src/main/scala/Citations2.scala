@@ -50,24 +50,29 @@ object Citations2 {
             //     JOIN data d2 
             //         ON d1.col < d2.col
             // """;
+            // val query = s"""
+            //     WITH nodes AS (
+            //         SELECT DISTINCT nodeid
+            //         FROM pdates
+            //         WHERE pyear <= $year
+            //     )
+            //     SELECT 
+            //         n1.nodeid AS a
+            //         ,n2.nodeid AS b
+            //     FROM nodes n1
+            //     JOIN nodes n2 
+            //         ON n1.nodeid < n2.nodeid
+            // """;
             val query = s"""
-                WITH nodes AS (
-                    SELECT DISTINCT nodeid
-                    FROM pdates
-                    WHERE pyear <= $year
-                )
-                SELECT 
-                    n1.nodeid AS a
-                    ,n2.nodeid AS b
-                FROM nodes n1
-                JOIN nodes n2 
-                    ON n1.nodeid < n2.nodeid
-            """;
+                SELECT DISTINCT nodeid
+                FROM pdates
+                WHERE pyear <= $year
+            """;            
             val distComb = spark.sql(query)
             distComb.show()
             distComb.createOrReplaceTempView("distComb")
             val n_nodes = distComb.count().toInt
-            println(s"Number of nodes in $year : $n_nodes")
+            println(s"Number of node combinations in $year : $n_nodes")
 
         }
 
