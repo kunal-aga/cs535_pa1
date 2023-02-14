@@ -19,7 +19,7 @@ object Citations2 {
             .drop("value")
         // citcleaned.show()
         citcleaned.printSchema()
-        citcleaned.createOrReplaceTempView("citations")
+        citcleaned.createOrReplaceTempView("citations_all")
 
         // Read published-dates from HDFS
         var pd = spark.read.textFile("hdfs:///pa1/published-dates.txt")
@@ -52,21 +52,21 @@ object Citations2 {
                     ON n1.nodeid < n2.nodeid
             """;
             val distComb = spark.sql(query)
-            distComb.show()
+            // distComb.show()
             distComb.createOrReplaceTempView("distComb")
-            val n_nodes = spark.sql("SELECT COUNT(*) FROM distComb").first().getLong(0).toInt
+            val n_nodes = spark.sql("SELECT COUNT(a) FROM distComb").first().getLong(0).toInt
             println(s"Number of node combinations in $year : $n_nodes")
 
             // // Subsample citations only till current year
-            // val query2 = s"""
-            //     SELECT c.*
-            //     FROM citations_all AS c
-            //     LEFT JOIN pdates AS pd
-            //         ON c.a = pd.nodeid
-            //     WHERE pd.pyear <= $year
-            // """;
-            // val cit_year = spark.sql(query2)
-            // cit_year.createOrReplaceTempView("citations")
+            val query2 = s"""
+                SELECT c.*
+                FROM citations_all AS c
+                LEFT JOIN pdates AS pd
+                    ON c.a = pd.nodeid
+                WHERE pd.pyear <= $year
+            """;
+            val cit_year = spark.sql(query2)
+            cit_year.createOrReplaceTempView("citations")
 
             // g(1)
             val queryg1 = """
@@ -81,8 +81,33 @@ object Citations2 {
             // g1.show()
             g1.createOrReplaceTempView("g1")
             // val n_g1 = g1.count().toInt
-            val n_g1 = spark.sql("SELECT COUNT(*) FROM g1").first().getLong(0).toInt
+            val n_g1 = spark.sql("SELECT COUNT(a) FROM g1").first().getLong(0).toInt
             println(s"Number of nodes in g(1) in $year year: $n_g1")
+
+            // g(2)
+            val queryg2 = """
+                WITH remainingComb AS (
+                    SELECT dc.a, dc.b
+                    FROM distComb AS dc
+                    LEFT JOIN g1
+                        ON dc.a = g1.a AND dc.b = g1.b
+                    WHERE g1.a IS NULL
+                )
+                SELECT DISTINCT rc.a, rc.b
+                FROM remainingComb AS rc
+                LEFT JOIN citations AS c1
+                    ON rc.a = c1.a OR rc.a = c1.b
+                LEFT JOIN citations AS c2
+                    ON (c2.a = rc.b OR c2.b = rc.b)
+                        AND (c1.a = c2.a OR c1.a = c2.b OR c1.b = c2.a OR c1.b = c2.b)
+                WHERE c2.a IS NOT NULL
+            """;
+            val g2 = spark.sql(queryg2)
+            // g2.show()
+            g2.createOrReplaceTempView("g2")
+            // val n_g2 = g2.count().toInt
+            val n_g2 = spark.sql("SELECT COUNT(a) FROM g2").first().getLong(0).toInt
+            println(s"Number of nodes in g(2) in $year year: $n_g2")
 
         }
 
