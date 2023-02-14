@@ -162,7 +162,7 @@ object Citations2 {
             Row("test", n_g1, n_g2, n_g3, n_g4)
         )
 
-        structureData2 = structureData :+ Row("test", n_g1, n_g2, n_g3, n_g4)
+        structureData = structureData :+ Row("test", n_g1, n_g2, n_g3, n_g4)
 
         val structureSchema = new StructType()
             .add("year",StringType)
