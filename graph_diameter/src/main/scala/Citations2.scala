@@ -79,7 +79,7 @@ object Citations2 {
         // g(3)
         val queryg3 = """
             WITH remainingComb AS (
-                SELECT *
+                SELECT dc.a, dc.b
                 FROM distComb AS dc
                 LEFT JOIN g1
                     ON dc.a = g1.a AND dc.b = g1.b
@@ -99,6 +99,7 @@ object Citations2 {
                     (c1.b != rc.a) 
                     AND ((c1.b = c2.a) OR (c1.b = c2.b AND c1.a != c2.a))
                 )
+            
                             
         """;
         val g3 = spark.sql(queryg3)
