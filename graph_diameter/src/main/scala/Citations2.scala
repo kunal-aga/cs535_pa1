@@ -33,6 +33,9 @@ object Citations2 {
         pdcleaned2.printSchema()
         pdcleaned2.createOrReplaceTempView("pdates")
 
+        // Seq (array) to save stats per year
+        var resultData = Seq(Row(0, 0, 0))
+
         for( year <- 1992 to 1993)
         {
             println(s"********* Year : $year **************")
@@ -57,7 +60,7 @@ object Citations2 {
             val n_nodes = spark.sql("SELECT COUNT(a) FROM distComb").first().getLong(0).toInt
             println(s"Number of node combinations in $year : $n_nodes")
 
-            // // Subsample citations only till current year
+            // Subsample citations only till current year
             val query2 = s"""
                 SELECT c.*
                 FROM citations_all AS c
@@ -109,35 +112,25 @@ object Citations2 {
             val n_g2 = spark.sql("SELECT COUNT(a) FROM g2").first().getLong(0).toInt
             println(s"Number of nodes in g(2) in $year year: $n_g2")
 
-        }
+            // Append stats to result seq
+            resultData = resultData :+ Row(year, n_g1, n_g2)
+
+        } // for loop end
+
+        // create output DF and export to HDFS
+        val resultSchema = new StructType()
+            .add("year",IntegerType)
+            .add("G1",IntegerType)
+            .add("G2",IntegerType)
+            // .add("G3",IntegerType)
+            // .add("G4",IntegerType)
+        val result = spark.createDataFrame(spark.sparkContext.parallelize(resultData), resultSchema)
+        result.printSchema()
+        result.show()
+        val outputPath = "hdfs:///pa1/graph_diameter_01"
+        result.coalesce(1).write.format("csv").save(outputPath)
 
 
-
-
-
-        // // g(2)
-        // val queryg2 = """
-        //     WITH remainingComb AS (
-        //         SELECT dc.a, dc.b
-        //         FROM distComb AS dc
-        //         LEFT JOIN g1
-        //             ON dc.a = g1.a AND dc.b = g1.b
-        //         WHERE g1.a IS NULL
-        //     )
-        //     SELECT DISTINCT rc.a, rc.b
-        //     FROM remainingComb AS rc
-        //     LEFT JOIN citations AS c1
-        //         ON rc.a = c1.a OR rc.a = c1.b
-        //     LEFT JOIN citations AS c2
-        //         ON (c2.a = rc.b OR c2.b = rc.b)
-        //             AND (c1.a = c2.a OR c1.a = c2.b OR c1.b = c2.a OR c1.b = c2.b)
-        //     WHERE c2.a IS NOT NULL
-        // """;
-        // val g2 = spark.sql(queryg2)
-        // g2.show()
-        // g2.createOrReplaceTempView("g2")
-        // val n_g2 = g2.count().toInt
-        // println(s"Number of nodes in g(2): $n_g2")
 
         // // g(3)
         // val queryg3 = """
