@@ -36,7 +36,7 @@ object Citations2 {
         // Seq (array) to save stats per year
         var resultData: Seq[Row] = Seq.empty[Row]
 
-        for( year <- 1992 to 1992)
+        for( year <- 1992 to 1994)
         {
             // println(s"********* Year : $year **************")
 
@@ -215,7 +215,7 @@ object Citations2 {
         val result = spark.createDataFrame(spark.sparkContext.parallelize(resultData), resultSchema)
         result.printSchema()
         result.show()
-        val outputPath = "hdfs:///pa1/graph_diameter_03"
+        val outputPath = "hdfs:///pa1/graph_diameter_04"
         result.coalesce(1).write.format("csv").save(outputPath)
 
         spark.stop()
