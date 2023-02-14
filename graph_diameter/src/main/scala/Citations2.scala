@@ -157,13 +157,10 @@ object Citations2 {
         println(s"Number of nodes in g(4): $n_g4")
 
         // create output
-        // case class TestIntConversion(scalaInt: scala.Int)
         var structureData = Seq(
             Row("test", n_g1, n_g2, n_g3, n_g4)
         )
-
         structureData = structureData :+ Row("test", n_g1, n_g2, n_g3, n_g4)
-
         val structureSchema = new StructType()
             .add("year",StringType)
             .add("G1",IntegerType)
