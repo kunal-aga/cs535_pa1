@@ -35,7 +35,7 @@ object Citations2 {
 
         for( year <- 1992 to 1994)
         {
-            println(s"********* Year : $n_g1 **************")
+            println(s"********* Year : $year **************")
 
             // sample query for forming distinct combinations 
             // val query = """
