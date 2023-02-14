@@ -156,19 +156,20 @@ object Citations2 {
         println(s"Number of nodes in g(4): $n_g4")
 
         // create output
-        // val structureData = Seq(
-        //     Row("test", g1, g2, g3, g4)
-        // )
-        // val structureSchema = new StructType()
-        //     .add("year",StringType)
-        //     .add("G1",IntegerType)
-        //     .add("G2",IntegerType)
-        //     .add("G3",IntegerType)
-        //     .add("G4",IntegerType)
+        val structureData = Seq(
+            // Row("test", g1, g2, g3, g4)
+            Row("test", 1, 2, 3, 4)
+        )
+        val structureSchema = new StructType()
+            .add("year",StringType)
+            .add("G1",IntegerType)
+            .add("G2",IntegerType)
+            .add("G3",IntegerType)
+            .add("G4",IntegerType)
+        val result = spark.createDataFrame(spark.sparkContext.parallelize(structureData), structureSchema)
 
-        // val result = spark.createDataFrame(spark.sparkContext.parallelize(structureData), structureSchema)
+        // val result = Seq(("test", g1)).toDF("year","G1")
 
-        val result = Seq(Row("test", g1)).toDF("year","G1")
         result.printSchema()
         result.show()
 
