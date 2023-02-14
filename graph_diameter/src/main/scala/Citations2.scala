@@ -153,9 +153,11 @@ object Citations2 {
         g4.show()
         g4.createOrReplaceTempView("g4")
         val n_g4 = g4.count()
+        val n_g42: Nothing = g4.count()
         println(s"Number of nodes in g(4): $n_g4")
 
         // create output
+        case class TestIntConversion(scalaInt: scala.Int)
         val structureData = Seq(
             // Row("test", g1, g2, g3, g4)
             Row("test", 1, 2, 3, 4)
