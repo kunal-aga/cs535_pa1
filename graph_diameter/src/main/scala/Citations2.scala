@@ -59,6 +59,8 @@ object Citations2 {
 
             val n_nodes_df = spark.sql("SELECT COUNT(*) FROM distComb")
             n_nodes_df.show()
+            val n_nodes_df_int = n_nodes_df.first().getInt(0)
+            println(s"Number of node combinations in $year : $n_nodes")
 
             // // Subsample citations only till current year
             // val query2 = s"""
