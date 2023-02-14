@@ -64,25 +64,25 @@ object Citations2 {
                     ON n1.nodeid < n2.nodeid
             """;
             val distComb = spark.sql(query)
-            distComb.show()
+            // distComb.show()
             distComb.createOrReplaceTempView("distComb")
             val n_nodes = distComb.count().toInt
             println(s"Number of node combinations in $year : $n_nodes")
 
-            // g(1)
-            val queryg1 = """
-                SELECT dc.a, dc.b
-                FROM distComb AS dc
-                LEFT JOIN citations AS c
-                    ON (c.a = dc.a AND c.b = dc.b)
-                        OR (c.a = dc.b AND c.b = dc.a)
-                WHERE c.a IS NOT NULL
-            """;
-            val g1 = spark.sql(queryg1)
-            g1.show()
-            g1.createOrReplaceTempView("g1")
-            val n_g1 = g1.count().toInt
-            println(s"Number of nodes in g(1) in $year year: $n_g1")
+            // // g(1)
+            // val queryg1 = """
+            //     SELECT dc.a, dc.b
+            //     FROM distComb AS dc
+            //     LEFT JOIN citations AS c
+            //         ON (c.a = dc.a AND c.b = dc.b)
+            //             OR (c.a = dc.b AND c.b = dc.a)
+            //     WHERE c.a IS NOT NULL
+            // """;
+            // val g1 = spark.sql(queryg1)
+            // g1.show()
+            // g1.createOrReplaceTempView("g1")
+            // val n_g1 = g1.count().toInt
+            // println(s"Number of nodes in g(1) in $year year: $n_g1")
 
         }
 
