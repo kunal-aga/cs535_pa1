@@ -161,13 +161,16 @@ object Citations2 {
         val structureData = Seq(
             Row("test", n_g1, n_g2, n_g3, n_g4)
         )
+
+        val structureData2 = structureData :+ Row("test", n_g1, n_g2, n_g3, n_g4)
+
         val structureSchema = new StructType()
             .add("year",StringType)
             .add("G1",IntegerType)
             .add("G2",IntegerType)
             .add("G3",IntegerType)
             .add("G4",IntegerType)
-        val result = spark.createDataFrame(spark.sparkContext.parallelize(structureData), structureSchema)
+        val result = spark.createDataFrame(spark.sparkContext.parallelize(structureData2), structureSchema)
         result.printSchema()
         result.show()
 
