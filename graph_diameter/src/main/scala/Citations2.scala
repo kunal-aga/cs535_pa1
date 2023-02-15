@@ -27,10 +27,10 @@ object Citations2 {
                 SELECT DISTINCT nodeid
                 FROM (
                     SELECT DISTINCT a AS nodeid
-                    FROM citcleaned
+                    FROM citations_all
                     UNION
                     SELECT DISTINCT b AS nodeid
-                    FROM citcleaned
+                    FROM citations_all
                 )
             )
             SELECT 
