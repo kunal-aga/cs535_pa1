@@ -11,8 +11,8 @@ object Citations2 {
         import spark.implicits._
         
         // Read Citations from HDFS
-        // var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
-        var cit = spark.read.textFile("hdfs:///pa1/test_data.txt")
+        var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
+        // var cit = spark.read.textFile("hdfs:///pa1/test_data.txt")
         cit = cit.filter(!$"value".contains("#"))
         val citcleaned = cit.withColumn("a", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("b", split(col("value"), "\t").getItem(1).cast("int"))
