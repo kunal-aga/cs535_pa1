@@ -11,8 +11,8 @@ object Citations2 {
         import spark.implicits._
         
         // Read Citations from HDFS
-        var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
-        // var cit = spark.read.textFile("hdfs:///pa1/test_data.txt")
+        // var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
+        var cit = spark.read.textFile("hdfs:///pa1/test_data.txt")
         cit = cit.filter(!$"value".contains("#"))
         val citcleaned = cit.withColumn("a", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("b", split(col("value"), "\t").getItem(1).cast("int"))
@@ -33,14 +33,16 @@ object Citations2 {
         pdcleaned2.createOrReplaceTempView("pdates")
 
         // Seq (array) to save stats per year
-        var resultData: Seq[Row] = Seq.empty[Row]
+        // var resultData: Seq[Row] = Seq.empty[Row]
 
-        for( year <- 1992 to 1993)
-        {
+        // for( year <- 1992 to 1993)
+        // {
             // println(s"********* Year : $year **************")
 
             // Distinct nodes
-            val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year")
+            // test_data
+            val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)")
+            // val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year")
             nodes.createOrReplaceTempView("nodes")
             // nodes.show()
 
@@ -217,7 +219,7 @@ object Citations2 {
         //     // Append stats to result seq
         //     resultData = resultData :+ Row(year, n_g1, n_g2, n_g3, n_g4)
 
-        } // for loop end
+        // } // for loop end
 
         // // create output DF and export to HDFS
         // val resultSchema = new StructType()
