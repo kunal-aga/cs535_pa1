@@ -42,6 +42,7 @@ object Citations2 {
             // Distinct nodes
             val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year").persist()
             nodes.createOrReplaceTempView("nodes")
+            nodes.show()
 
             // Distinct node combinations 
             val query = """
@@ -53,7 +54,7 @@ object Citations2 {
                     ON n1.nodeid < n2.nodeid
             """;
             val distComb = spark.sql(query).persist()
-            // distComb.show()
+            distComb.show()
             distComb.createOrReplaceTempView("distComb")
 
             // citations simplified and magnified
