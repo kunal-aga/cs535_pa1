@@ -17,131 +17,83 @@ object Citations2 {
         val citcleaned = cit.withColumn("a", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("b", split(col("value"), "\t").getItem(1).cast("int"))
             .drop("value")
-        citcleaned.show()
+        // citcleaned.show()
         // citcleaned.printSchema()
         citcleaned.createOrReplaceTempView("citations_all")
 
-        // Distinct node combinations 
-        val query = """
-            WITH nodes AS (
-                SELECT DISTINCT nodeid
-                FROM (
-                    SELECT DISTINCT a AS nodeid
-                    FROM citations_all
-                    UNION
-                    SELECT DISTINCT b AS nodeid
-                    FROM citations_all
-                )
-            )
-            SELECT 
-                n1.nodeid AS a
-                ,n2.nodeid AS b
-            FROM nodes n1
-            JOIN nodes n2 
-                ON n1.nodeid < n2.nodeid
-        """;
-        val distComb = spark.sql(query)
-        distComb.show()
-        distComb.createOrReplaceTempView("distComb")
+        // Read published-dates from HDFS
+        var pd = spark.read.textFile("hdfs:///pa1/published-dates.txt")
+        pd = pd.filter(!$"value".contains("#"))
+        val pdcleaned = pd.withColumn("nodeid", split(col("value"), "\t").getItem(0).cast("int"))
+            .withColumn("pdate", split(col("value"), "\t").getItem(1))
+            .drop("value")
+        val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int")).persist()
+        // pdcleaned2.show()
+        // pdcleaned2.printSchema()
+        pdcleaned2.createOrReplaceTempView("pdates")
 
-        // simplified citations
-        val query2 = """
-            WITH nodes AS (
-                SELECT DISTINCT nodeid
-                FROM (
-                    SELECT DISTINCT a AS nodeid
-                    FROM citations_all
-                    UNION
-                    SELECT DISTINCT b AS nodeid
-                    FROM citations_all
-                )
-            )
-            SELECT
-                n.nodeid AS a
-                ,IF(n.nodeid=c.a, c.b, c.a) AS b
-            FROM nodes AS n
-            LEFT JOIN citations_all AS c
-                ON n.nodeid = c.a 
-                    OR n.nodeid = c.b
-        """;
-        val citSimp = spark.sql(query2)
-        citSimp.show()
-        citSimp.createOrReplaceTempView("citSimp")
+        // Seq (array) to save stats per year
+        var resultData: Seq[Row] = Seq.empty[Row]
 
+        for( year <- 1992 to 1992)
+        {
+            // println(s"********* Year : $year **************")
 
-        // // Read published-dates from HDFS
-        // var pd = spark.read.textFile("hdfs:///pa1/published-dates.txt")
-        // pd = pd.filter(!$"value".contains("#"))
-        // val pdcleaned = pd.withColumn("nodeid", split(col("value"), "\t").getItem(0).cast("int"))
-        //     .withColumn("pdate", split(col("value"), "\t").getItem(1))
-        //     .drop("value")
-        // val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int")).persist()
-        // // pdcleaned2.show()
-        // // pdcleaned2.printSchema()
-        // pdcleaned2.createOrReplaceTempView("pdates")
+            // Distinct nodes
+            val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year").persist()
+            nodes.createOrReplaceTempView("nodes")
 
-        // // Seq (array) to save stats per year
-        // var resultData: Seq[Row] = Seq.empty[Row]
+            // Distinct node combinations 
+            val query = """
+                SELECT 
+                    n1.nodeid AS a
+                    ,n2.nodeid AS b
+                FROM nodes n1
+                JOIN nodes n2 
+                    ON n1.nodeid < n2.nodeid
+            """;
+            val distComb = spark.sql(query).persist()
+            // distComb.show()
+            distComb.createOrReplaceTempView("distComb")
 
-        // for( year <- 1992 to 2002)
-        // {
-        //     // println(s"********* Year : $year **************")
+            // citations simplified and magnified
+            val query2 = s"""
+                SELECT
+                    n.nodeid AS a
+                    ,IF(n.nodeid=c.a, c.b, c.a) AS b
+                FROM nodes AS n
+                LEFT JOIN citations_all AS c
+                    ON n.nodeid = c.a 
+                        OR n.nodeid = c.b
+            """;
+            var cit_year = spark.sql(query2).persist()
+            cit_year.createOrReplaceTempView("citations")
 
-        //     // Distinct node combinations 
-        //     val query = s"""
-        //         WITH nodes AS (
-        //             SELECT DISTINCT nodeid
-        //             FROM pdates
-        //             WHERE pyear <= $year
-        //         )
-        //         SELECT 
-        //             n1.nodeid AS a
-        //             ,n2.nodeid AS b
-        //         FROM nodes n1
-        //         JOIN nodes n2 
-        //             ON n1.nodeid < n2.nodeid
-        //     """;
-        //     val distComb = spark.sql(query).persist()
-        //     // distComb.show()
-        //     distComb.createOrReplaceTempView("distComb")
+            // g(1)
+            val queryg1 = """
+                SELECT dc.a, dc.b
+                FROM distComb AS dc
+                LEFT JOIN citations AS c
+                    ON dc.a = c.a AND dc.b = c.b
+                WHERE c.a IS NOT NULL
+            """;
+            var g1 = spark.sql(queryg1).persist()
+            // g1.show()
+            g1.createOrReplaceTempView("g1")
+            val n_g1 = g1.count().toInt
+            // val n_g1 = spark.sql("SELECT COUNT(a) FROM g1").first().getLong(0).toInt
+            println(s"Number of nodes in g(1) in $year year: $n_g1")
 
-        //     // Subsample citations only till current year
-        //     val query2 = s"""
-        //         SELECT c.*
-        //         FROM citations_all AS c
-        //         LEFT JOIN pdates AS pd
-        //             ON c.a = pd.nodeid
-        //         WHERE pd.pyear <= $year
-        //     """;
-        //     var cit_year = spark.sql(query2).persist()
-        //     cit_year.createOrReplaceTempView("citations")
-
-        //     // g(1)
-        //     val queryg1 = """
-        //         SELECT dc.a, dc.b
-        //         FROM distComb AS dc
-        //         LEFT JOIN citations AS c
-        //             ON (c.a = dc.a AND c.b = dc.b)
-        //                 OR (c.a = dc.b AND c.b = dc.a)
-        //         WHERE c.a IS NOT NULL
-        //     """;
-        //     var g1 = spark.sql(queryg1).persist()
-        //     // g1.show()
-        //     g1.createOrReplaceTempView("g1")
-        //     val n_g1 = g1.count().toInt
-        //     // val n_g1 = spark.sql("SELECT COUNT(a) FROM g1").first().getLong(0).toInt
-        //     println(s"Number of nodes in g(1) in $year year: $n_g1")
-
-        //     // g(2)
-        //     var remainingComb = spark.sql("""
-        //             SELECT dc.a, dc.b
-        //             FROM distComb AS dc
-        //             LEFT JOIN g1
-        //                 ON dc.a = g1.a AND dc.b = g1.b
-        //             WHERE g1.a IS NULL
-        //         """).persist()
-        //     remainingComb.createOrReplaceTempView("remainingComb")
-        //     distComb.unpersist()
+            // // g(2)
+            // var remainingComb = spark.sql("""
+            //         SELECT dc.a, dc.b
+            //         FROM distComb AS dc
+            //         LEFT JOIN g1
+            //             ON dc.a = g1.a AND dc.b = g1.b
+            //         WHERE g1.a IS NULL
+            //     """).persist()
+            // remainingComb.createOrReplaceTempView("remainingComb")
+            // distComb.unpersist()
 
         //     val queryg2 = """
         //         SELECT DISTINCT rc.a, rc.b
@@ -251,7 +203,7 @@ object Citations2 {
         //     // Append stats to result seq
         //     resultData = resultData :+ Row(year, n_g1, n_g2, n_g3, n_g4)
 
-        // } // for loop end
+        } // for loop end
 
         // // create output DF and export to HDFS
         // val resultSchema = new StructType()
@@ -263,8 +215,8 @@ object Citations2 {
         // val result = spark.createDataFrame(spark.sparkContext.parallelize(resultData), resultSchema)
         // result.printSchema()
         // result.show()
-        // val outputPath = "hdfs:///pa1/graph_diameter_05"
-        // result.coalesce(1).write.format("csv").save(outputPath)
+        // // val outputPath = "hdfs:///pa1/graph_diameter_05"
+        // // result.coalesce(1).write.format("csv").save(outputPath)
 
         spark.stop()
     }
