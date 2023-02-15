@@ -82,39 +82,49 @@ object Citations2 {
                 WHERE c.a IS NOT NULL
             """;
             val g1 = spark.sql(queryg1).persist()
-            g1.show()
+            // g1.show()
             g1.createOrReplaceTempView("g1")
             val n_g1 = g1.count().toInt
             // val n_g1 = spark.sql("SELECT COUNT(a) FROM g1").first().getLong(0).toInt
             println(s"Number of nodes in g(1) in $year year: $n_g1")
 
-            // // g(2)
-            // var remainingComb = spark.sql("""
-            //         SELECT dc.a, dc.b
-            //         FROM distComb AS dc
-            //         LEFT JOIN g1
-            //             ON dc.a = g1.a AND dc.b = g1.b
-            //         WHERE g1.a IS NULL
-            //     """).persist()
-            // remainingComb.createOrReplaceTempView("remainingComb")
-            // distComb.unpersist()
+            // g(2)
+            val remainingComb = spark.sql("""
+                    SELECT dc.a, dc.b
+                    FROM distComb AS dc
+                    LEFT JOIN g1
+                        ON dc.a = g1.a AND dc.b = g1.b
+                    WHERE g1.a IS NULL
+                """).persist()
+            remainingComb.createOrReplaceTempView("remainingComb")
+            distComb.unpersist()
+            g1.unpersist()
 
-        //     val queryg2 = """
-        //         SELECT DISTINCT rc.a, rc.b
-        //         FROM remainingComb AS rc
-        //         LEFT JOIN citations AS c1
-        //             ON rc.a = c1.a OR rc.a = c1.b
-        //         LEFT JOIN citations AS c2
-        //             ON (c2.a = rc.b OR c2.b = rc.b)
-        //                 AND (c1.a = c2.a OR c1.a = c2.b OR c1.b = c2.a OR c1.b = c2.b)
-        //         WHERE c2.a IS NOT NULL
-        //     """;
-        //     var g2 = spark.sql(queryg2).persist()
-        //     // g2.show()
-        //     g2.createOrReplaceTempView("g2")
-        //     val n_g2 = g2.count().toInt + n_g1
-        //     // val n_g2 = spark.sql("SELECT COUNT(a) FROM g2").first().getLong(0).toInt + n_g1
-        //     println(s"Number of nodes in g(2) in $year year: $n_g2")
+            // val queryg2 = """
+            //     SELECT DISTINCT rc.a, rc.b
+            //     FROM remainingComb AS rc
+            //     LEFT JOIN citations AS c1
+            //         ON rc.a = c1.a OR rc.a = c1.b
+            //     LEFT JOIN citations AS c2
+            //         ON (c2.a = rc.b OR c2.b = rc.b)
+            //             AND (c1.a = c2.a OR c1.a = c2.b OR c1.b = c2.a OR c1.b = c2.b)
+            //     WHERE c2.a IS NOT NULL
+            // """;
+            val queryg2 = """
+                SELECT DISTINCT rc.a, rc.b
+                FROM remainingComb AS rc
+                LEFT JOIN citations AS c1
+                    ON rc.a = c1.a
+                LEFT JOIN citations AS c2
+                    ON c1.b = c2.a AND rc.b = c2.b
+                WHERE c2.a IS NOT NULL
+            """;
+            val g2 = spark.sql(queryg2).persist()
+            // g2.show()
+            g2.createOrReplaceTempView("g2")
+            val n_g2 = g2.count().toInt + n_g1
+            // val n_g2 = spark.sql("SELECT COUNT(a) FROM g2").first().getLong(0).toInt + n_g1
+            println(s"Number of nodes in g(2) in $year year: $n_g2")
 
         //     // g(3)
         //     remainingComb = spark.sql("""
