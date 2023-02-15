@@ -81,7 +81,7 @@ object Citations2 {
                 WHERE c.a IS NOT NULL
             """;
             var g1 = spark.sql(queryg1).persist()
-            // g1.show()
+            g1.show()
             g1.createOrReplaceTempView("g1")
             val n_g1 = g1.count().toInt
             // val n_g1 = spark.sql("SELECT COUNT(a) FROM g1").first().getLong(0).toInt
