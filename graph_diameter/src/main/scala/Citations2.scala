@@ -35,14 +35,14 @@ object Citations2 {
         // Seq (array) to save stats per year
         var resultData: Seq[Row] = Seq.empty[Row]
 
-        for( year <- 1992 to 1992)
+        for( year <- 1992 to 1993)
         {
             // println(s"********* Year : $year **************")
 
             // Distinct nodes
-            val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year").persist()
+            val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year")
             nodes.createOrReplaceTempView("nodes")
-            nodes.show()
+            // nodes.show()
 
             // Distinct node combinations 
             val query = """
@@ -54,7 +54,7 @@ object Citations2 {
                     ON n1.nodeid < n2.nodeid
             """;
             val distComb = spark.sql(query).persist()
-            distComb.show()
+            // distComb.show()
             distComb.createOrReplaceTempView("distComb")
 
             // citations simplified and magnified
@@ -67,11 +67,11 @@ object Citations2 {
                     ON n.nodeid = c.a 
                         OR n.nodeid = c.b
             """;
-            var cit_year = spark.sql(query2).persist()
+            val cit_year = spark.sql(query2).persist()
             cit_year.createOrReplaceTempView("citations")
-            cit_year.show()
-            val n_cit_simp = cit_year.count().toInt
-            println(s"Number of simplified citaions in $year year: $n_cit_simp")
+            // cit_year.show()
+            // val n_cit_simp = cit_year.count().toInt
+            // println(s"Number of simplified citations in $year year: $n_cit_simp")
 
             // g(1)
             val queryg1 = """
@@ -81,7 +81,7 @@ object Citations2 {
                     ON dc.a = c.a AND dc.b = c.b
                 WHERE c.a IS NOT NULL
             """;
-            var g1 = spark.sql(queryg1).persist()
+            val g1 = spark.sql(queryg1).persist()
             g1.show()
             g1.createOrReplaceTempView("g1")
             val n_g1 = g1.count().toInt
