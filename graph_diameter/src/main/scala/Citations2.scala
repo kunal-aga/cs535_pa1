@@ -35,8 +35,8 @@ object Citations2 {
         // Seq (array) to save stats per year
         // var resultData: Seq[Row] = Seq.empty[Row]
 
-        // for( year <- 1992 to 1993)
-        // {
+        for( year <- 1992 to 1992)
+        {
             // println(s"********* Year : $year **************")
 
             // Distinct nodes
@@ -219,7 +219,7 @@ object Citations2 {
         //     // Append stats to result seq
         //     resultData = resultData :+ Row(year, n_g1, n_g2, n_g3, n_g4)
 
-        // } // for loop end
+        } // for loop end
 
         // // create output DF and export to HDFS
         // val resultSchema = new StructType()
