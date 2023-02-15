@@ -102,7 +102,7 @@ object Citations2 {
             val g2 = spark.sql(queryg2).persist()
             g2.createOrReplaceTempView("g2")
             val n_g2 = g2.count().toInt + n_g1
-            println(s"Number of nodes in g(2) in $year year: $n_g2")
+            // println(s"Number of nodes in g(2) in $year year: $n_g2")
 
             // g(3)
             remainingComb = spark.sql("""
@@ -128,7 +128,7 @@ object Citations2 {
             var g3 = spark.sql(queryg3).persist()
             g3.createOrReplaceTempView("g3")
             val n_g3 = g3.count().toInt + n_g2
-            println(s"Number of nodes in g(3) in $year year: $n_g3")
+            // println(s"Number of nodes in g(3) in $year year: $n_g3")
 
             // g(4)
             remainingComb = spark.sql("""
