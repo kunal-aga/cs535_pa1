@@ -21,7 +21,28 @@ object Citations2 {
         // citcleaned.printSchema()
         citcleaned.createOrReplaceTempView("citations_all")
 
-        
+        // Distinct node combinations 
+        val query = s"""
+            WITH nodes AS (
+                SELECT DISTINCT nodeid
+                FROM (
+                    SELECT DISTINCT a AS nodeid
+                    FROM citcleaned
+                    UNION
+                    SELECT DISTINCT b AS nodeid
+                    FROM citcleaned
+                )
+            )
+            SELECT 
+                n1.nodeid AS a
+                ,n2.nodeid AS b
+            FROM nodes n1
+            JOIN nodes n2 
+                ON n1.nodeid < n2.nodeid
+        """;
+        val distComb = spark.sql(query)
+        distComb.show()
+        distComb.createOrReplaceTempView("distComb")
 
 
         // // Read published-dates from HDFS
