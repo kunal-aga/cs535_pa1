@@ -37,7 +37,7 @@ object Citations2 {
 
         for( year <- 1992 to 1994)
         {
-            // println(s"********* Year : $year **************")
+            println(s"********* Year : $year **************")
 
             // Distinct nodes
             // test_data
