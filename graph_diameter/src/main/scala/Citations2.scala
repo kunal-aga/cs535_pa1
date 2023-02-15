@@ -58,7 +58,7 @@ object Citations2 {
             )
             SELECT
                 n.nodeid AS a
-                ,IF(n.nodeid=c.a, c.b, c.a)
+                ,IF(n.nodeid=c.a, c.b, c.a) AS b
             FROM nodes AS n
             LEFT JOIN citations_all AS c
                 ON n.nodeid = c.a 
