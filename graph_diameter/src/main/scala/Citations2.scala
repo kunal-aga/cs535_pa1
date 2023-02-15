@@ -68,6 +68,9 @@ object Citations2 {
             """;
             var cit_year = spark.sql(query2).persist()
             cit_year.createOrReplaceTempView("citations")
+            cit_year.show()
+            val n_cit_simp = cit_year.count().toInt
+            println(s"Number of simplified citaions in $year year: $n_cit_simp")
 
             // g(1)
             val queryg1 = """
