@@ -150,6 +150,40 @@ object Citations2 {
                     LEFT JOIN citations AS c2
                         ON c1b = c2.a                    
                     WHERE g1p = 0
+                ),
+                gd3 AS (
+                    SELECT
+                        gdf2.a AS a
+                        ,gdf2.b AS b
+                        ,gdf2.c1a AS c1a
+                        ,gdf2.c1b AS c1b
+                        ,gdf2.c2a AS c2a
+                        ,gdf2.c2b AS c2b
+                        ,c3.a AS c3a
+                        ,c3.b AS c3b
+                        ,IF(gdf2.b = c3.b, 1, 0) AS g3
+                    FROM (SELECT *, MAX(g2) OVER(PARTITION BY a,b) AS g2p FROM gd2) AS gdf2
+                    LEFT JOIN citations AS c3
+                        ON c2b = c3.a                    
+                    WHERE g2p = 0
+                ), 
+                gd4 AS (
+                    SELECT
+                        gdf3.a AS a
+                        ,gdf3.b AS b
+                        ,gdf3.c1a AS c1a
+                        ,gdf3.c1b AS c1b
+                        ,gdf3.c2a AS c2a
+                        ,gdf3.c2b AS c2b
+                        ,gdf3.c3a AS c3a
+                        ,gdf3.c3b AS c3b
+                        ,c4.a AS c4a
+                        ,c4.b AS c4b
+                        ,IF(gdf3.b = c4.b, 1, 0) AS g4
+                    FROM (SELECT *, MAX(g3) OVER(PARTITION BY a,b) AS g3p FROM gd3) AS gdf3
+                    LEFT JOIN citations AS c4
+                        ON c3b = c4.a                    
+                    WHERE g3p = 0
                 )
                 SELECT
                     '$year' AS year
@@ -163,11 +197,19 @@ object Citations2 {
                     SELECT 'g2' AS density_level, COUNT(DISTINCT a, b) AS density
                     FROM gd2
                     WHERE g2 =1
+                    UNION
+                    SELECT 'g3' AS density_level, COUNT(DISTINCT a, b) AS density
+                    FROM gd3
+                    WHERE g3 =1
+                    UNION
+                    SELECT 'g4' AS density_level, COUNT(DISTINCT a, b) AS density
+                    FROM gd4
+                    WHERE g4 =1
                 )
             """
             val graph_diameter_py = spark.sql(query)
             graph_diameter_py.show()
-            val outputPath = s"hdfs:///pa1/graph_diameter_test_py_01/$year"
+            val outputPath = s"hdfs:///pa1/graph_diameter_test_py_02/$year"
             // graph_diameter_py.coalesce(1).write.format("csv").save(outputPath)
             graph_diameter_py.write.format("csv").save(outputPath)
 
