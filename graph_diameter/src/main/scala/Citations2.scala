@@ -99,7 +99,7 @@ object Citations2 {
             """
             val all_links = spark.sql(all_links_query)
             all_links.createOrReplaceTempView("all_links")
-            // all_links.show()
+            all_links.show()
             // val n_all_links = all_links.count().toInt
             // println(s"Number of records in all_links: $n_all_links")
             val outputPath = "hdfs:///pa1/graph_diameter_io_03/all_links"
@@ -117,7 +117,7 @@ object Citations2 {
             """
             val gd1 = spark.sql(gd1_q)
             gd1.createOrReplaceTempView("gd1")
-            // gd1.show()
+            gd1.show()
             val outputPath = "hdfs:///pa1/graph_diameter_io_03/gd1"
             gd1.coalesce(1).write.format("csv").save(outputPath)
 
@@ -135,7 +135,7 @@ object Citations2 {
             """
             val gd2 = spark.sql(gd2_q)
             gd2.createOrReplaceTempView("gd2")
-            // gd2.show()
+            gd2.show()
             val outputPath = "hdfs:///pa1/graph_diameter_io_03/gd2"
             gd2.coalesce(1).write.format("csv").save(outputPath)
 
