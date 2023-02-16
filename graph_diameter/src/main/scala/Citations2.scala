@@ -52,6 +52,7 @@ object Citations2 {
                     ON n1.nodeid < n2.nodeid
             """;
             val distComb = spark.sql(query)//.persist()
+            distComb.show()
             distComb.createOrReplaceTempView("distComb")
 
             // citations simplified and magnified
@@ -65,6 +66,7 @@ object Citations2 {
                         OR n.nodeid = c.b
             """;
             val cit_year = spark.sql(query2)//.persist()
+            cit_year.show()
             cit_year.createOrReplaceTempView("citations")
 
 
