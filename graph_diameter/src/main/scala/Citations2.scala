@@ -154,9 +154,9 @@ object Citations2 {
         } // for loop end
 
         // graph_diameter.show()
-        val outputPath = "hdfs:///pa1/graph_diameter_test_05"
-        // graph_diameter.coalesce(1).write.format("csv").save(outputPath)
-        graph_diameter.write.format("csv").save(outputPath)
+        val outputPath = "hdfs:///pa1/graph_diameter_test_06"
+        graph_diameter.coalesce(1).write.format("csv").save(outputPath)
+        // graph_diameter.write.format("csv").save(outputPath)
 
         spark.stop()
     }
