@@ -36,76 +36,6 @@ object Citations2 {
             println(s"********* Year : $year **************")
 
             // Single query and write per year
-            // val query = s"""
-            //     WITH nodes AS (SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)),
-            //     -- WITH nodes AS (SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year),
-            //     distComb AS (
-            //         SELECT 
-            //             n1.nodeid AS a
-            //             ,n2.nodeid AS b
-            //         FROM nodes n1
-            //         JOIN nodes n2 
-            //             ON n1.nodeid < n2.nodeid                
-            //     ),
-            //     citations AS (
-            //         SELECT
-            //             n.nodeid AS a
-            //             ,IF(n.nodeid=c.a, c.b, c.a) AS b
-            //         FROM nodes AS n
-            //         LEFT JOIN citations_all AS c
-            //             ON n.nodeid = c.a 
-            //                 OR n.nodeid = c.b                
-            //     ),
-            //     all_links AS (
-            //         SELECT 
-            //             dc.a AS dca
-            //             ,dc.b AS dcb
-            //             ,c1.a AS c1a
-            //             ,c1.b AS c1b
-            //             ,c2.a AS c2a
-            //             ,c2.b AS c2b
-            //             ,c3.a AS c3a
-            //             ,c3.b AS c3b
-            //             ,c4.a AS c4a
-            //             ,c4.b AS c4b
-            //         FROM distComb AS dc
-            //         LEFT JOIN citations AS c1
-            //             ON dc.a = c1.a
-            //         LEFT JOIN citations AS c2
-            //             ON c1.b = c2.a
-            //         LEFT JOIN citations AS c3
-            //             ON c2.b = c3.a
-            //         LEFT JOIN citations AS c4
-            //             ON c3.b = c4.a 
-            //     )
-            //     SELECT 
-            //         '$year' AS year
-            //         ,SUM(g1) AS g1
-            //         ,SUM(g2) AS g2
-            //         ,SUM(g3) AS g3
-            //         ,SUM(g4) AS g4
-            //     FROM (
-            //         SELECT
-            //             a
-            //             ,b
-            //             ,MAX(g1) AS g1
-            //             ,MAX(g2) AS g2
-            //             ,MAX(g3) AS g3
-            //             ,MAX(g4) AS g4
-            //         FROM (
-            //             SELECT 
-            //                 dca AS a
-            //                 ,dcb AS b
-            //                 ,IF(c1b=dcb, 1, 0) AS g1
-            //                 ,IF((c1b=dcb OR c2b=dcb), 1, 0) AS g2
-            //                 ,IF((c1b=dcb OR c2b=dcb OR c3b=dcb), 1, 0) AS g3
-            //                 ,IF((c1b=dcb OR c2b=dcb OR c3b=dcb OR c4b=dcb), 1, 0) AS g4
-            //             FROM all_links
-            //         )
-            //         GROUP BY 
-            //             a, b
-            //     )            
-            // """
             val query = s"""
                 -- WITH nodes AS (SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)),
                 WITH nodes AS (SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year),
@@ -208,11 +138,10 @@ object Citations2 {
                     FROM gd4
                     WHERE g4 = 1
                 )
-
             """
             val graph_diameter_py = spark.sql(query)
             // graph_diameter_py.show()
-            val outputPath = s"hdfs:///pa1/graph_diameter_py_03/$year"
+            val outputPath = s"hdfs:///pa1/graph_diameter_py_04/$year"
             // graph_diameter_py.coalesce(1).write.format("csv").save(outputPath)
             graph_diameter_py.write.format("csv").save(outputPath)
 
