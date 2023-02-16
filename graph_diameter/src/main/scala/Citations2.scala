@@ -192,19 +192,19 @@ object Citations2 {
                 FROM (
                     SELECT 'g1' AS density_level, COUNT(DISTINCT a, b) AS density
                     FROM gd1
-                    WHERE g1 =1
+                    WHERE g1 = 1
                     UNION
                     SELECT 'g2' AS density_level, COUNT(DISTINCT a, b) AS density
                     FROM gd2
-                    WHERE g2 =1
+                    WHERE g2 = 1
                     UNION
                     SELECT 'g3' AS density_level, COUNT(DISTINCT a, b) AS density
                     FROM gd3
-                    WHERE g3 =1
+                    WHERE g3 = 1
                     UNION
                     SELECT 'g4' AS density_level, COUNT(DISTINCT a, b) AS density
                     FROM gd4
-                    WHERE g4 =1
+                    WHERE g4 = 1
                 )
             """
             val graph_diameter_py = spark.sql(query)
