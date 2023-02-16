@@ -96,6 +96,11 @@ object Citations2 {
             """
             val all_links = spark.sql(all_links_query)
             all_links.show()
+            val n_all_links = all_links.count().toInt
+            println(s"Number of records in all_links: $n_all_links")
+            val outputPath = "hdfs:///pa1/graph_diameter_io_01"
+            all_links.coalesce(1).write.format("csv").save(outputPath)
+
 
             val singleQuery = """
                 WITH all_links AS (
