@@ -30,9 +30,10 @@ object Citations2 {
         pdcleaned2.createOrReplaceTempView("pdates")
 
         // Seq (array) to save stats per year
-        var resultData: Seq[Row] = Seq.empty[Row]
+        // var resultData: Seq[Row] = Seq.empty[Row]
+        var graph_diameter = spark.emptyDataFrame
 
-        for( year <- 1992 to 1992)
+        for( year <- 1992 to 1993)
         {
             println(s"********* Year : $year **************")
 
@@ -125,6 +126,13 @@ object Citations2 {
             """
             val graph_diameter_py = spark.sql(singleQuery)
             graph_diameter_py.show()
+
+            // append to final output
+            if (year == 1992) {
+                graph_diameter = graph_diameter_py
+            } else {
+                graph_diameter = graph_diameter.union(graph_diameter_py)
+            }
 
             // // g(1)
             // val queryg1 = """
@@ -243,6 +251,7 @@ object Citations2 {
         // result.show()
         // val outputPath = "hdfs:///pa1/graph_diameter_08"
         // result.coalesce(1).write.format("csv").save(outputPath)
+        graph_diameter.show()
 
         spark.stop()
     }
