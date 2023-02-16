@@ -127,12 +127,16 @@ object Citations2 {
             val graph_diameter_py = spark.sql(singleQuery)
             // graph_diameter_py.show()
 
+            val outputPath = s"hdfs:///pa1/graph_diameter_py/$year"
+            // graph_diameter.coalesce(1).write.format("csv").save(outputPath)
+            graph_diameter.write.format("csv").save(outputPath)
+
             // append to final output
-            if (year == 1992) {
-                graph_diameter = graph_diameter_py
-            } else {
-                graph_diameter = graph_diameter.union(graph_diameter_py)
-            }
+            // if (year == 1992) {
+            //     graph_diameter = graph_diameter_py
+            // } else {
+            //     graph_diameter = graph_diameter.union(graph_diameter_py)
+            // }
 
             // // g(1)
             // val queryg1 = """
@@ -249,10 +253,11 @@ object Citations2 {
         // val result = spark.createDataFrame(spark.sparkContext.parallelize(resultData), resultSchema)
         // result.printSchema()
         // result.show()
+
         // graph_diameter.show()
-        val outputPath = "hdfs:///pa1/graph_diameter_10"
+        // val outputPath = "hdfs:///pa1/graph_diameter_10"
         // graph_diameter.coalesce(1).write.format("csv").save(outputPath)
-        graph_diameter.write.format("csv").save(outputPath)
+        // graph_diameter.write.format("csv").save(outputPath)
 
         spark.stop()
     }
