@@ -11,8 +11,8 @@ object Citations2 {
         import spark.implicits._
         
         // Read Citations from HDFS
-        // var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
-        var cit = spark.read.textFile("hdfs:///pa1/test_data.txt")
+        var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
+        // var cit = spark.read.textFile("hdfs:///pa1/test_data.txt")
         cit = cit.filter(!$"value".contains("#"))
         val citcleaned = cit.withColumn("a", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("b", split(col("value"), "\t").getItem(1).cast("int"))
@@ -39,8 +39,8 @@ object Citations2 {
 
             // Distinct nodes
             // test_data
-            val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)")
-            // val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year")
+            // val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)")
+            val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year")
             nodes.createOrReplaceTempView("nodes")
 
             // Distinct node combinations 
@@ -249,9 +249,9 @@ object Citations2 {
         // val result = spark.createDataFrame(spark.sparkContext.parallelize(resultData), resultSchema)
         // result.printSchema()
         // result.show()
-        // val outputPath = "hdfs:///pa1/graph_diameter_08"
-        // result.coalesce(1).write.format("csv").save(outputPath)
         graph_diameter.show()
+        val outputPath = "hdfs:///pa1/graph_diameter_08"
+        graph_diameter.coalesce(1).write.format("csv").save(outputPath)
 
         spark.stop()
     }
