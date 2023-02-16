@@ -87,18 +87,21 @@ object Citations2 {
                 LEFT JOIN citations AS c1
                     ON dc.a = c1.a
                 LEFT JOIN citations AS c2
-                    ON c1.b = c2.a
+                    ON c1.b = c2.a 
+                        AND c1.b != dc.b
                 LEFT JOIN citations AS c3
                     ON c2.b = c3.a
+                        AND c2.b != dc.b
                 LEFT JOIN citations AS c4
                     ON c3.b = c4.a 
-                    -- AND dc.b = c4.b
+                        AND c3.b != dc.b
+                        -- AND dc.b = c4.b
             """
             val all_links = spark.sql(all_links_query)
             all_links.show()
             val n_all_links = all_links.count().toInt
             println(s"Number of records in all_links: $n_all_links")
-            val outputPath = "hdfs:///pa1/graph_diameter_io_01"
+            val outputPath = "hdfs:///pa1/graph_diameter_io_02"
             all_links.coalesce(1).write.format("csv").save(outputPath)
 
 
