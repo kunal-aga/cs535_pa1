@@ -17,7 +17,7 @@ object Citations2 {
         val citcleaned = cit.withColumn("a", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("b", split(col("value"), "\t").getItem(1).cast("int"))
             .drop("value")
-            .persist()
+            // .persist()
         citcleaned.createOrReplaceTempView("citations_all")
 
         // Read published-dates from HDFS
@@ -26,7 +26,7 @@ object Citations2 {
         val pdcleaned = pd.withColumn("nodeid", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("pdate", split(col("value"), "\t").getItem(1))
             .drop("value")
-        val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int")).persist()
+        val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int"))//.persist()
         pdcleaned2.createOrReplaceTempView("pdates")
 
         // Seq (array) to save stats per year
