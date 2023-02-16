@@ -71,73 +71,73 @@ object Citations2 {
 
 
             //Single query for g(1-4)
-            val all_links_query = """
-                SELECT 
-                    dc.a AS dca
-                    ,dc.b AS dcb
-                    ,c1.a AS c1a
-                    ,c1.b AS c1b
-                    ,c2.a AS c2a
-                    ,c2.b AS c2b
-                    ,c3.a AS c3a
-                    ,c3.b AS c3b
-                    ,c4.a AS c4a
-                    ,c4.b AS c4b
-                FROM distComb AS dc
-                LEFT JOIN citations AS c1
-                    ON dc.a = c1.a
-                LEFT JOIN citations AS c2
-                    ON c1.b = c2.a 
-                        AND c1.b != dc.b
-                LEFT JOIN citations AS c3
-                    ON c2.b = c3.a
-                        AND c2.b != dc.b
-                LEFT JOIN citations AS c4
-                    ON c3.b = c4.a 
-                        AND c3.b != dc.b
-                        -- AND dc.b = c4.b
-            """
-            val all_links = spark.sql(all_links_query)
-            all_links.createOrReplaceTempView("all_links")
-            all_links.show()
-            // val n_all_links = all_links.count().toInt
-            // println(s"Number of records in all_links: $n_all_links")
-            var outputPath = "hdfs:///pa1/graph_diameter_io_03/all_links"
-            all_links.coalesce(1).write.format("csv").save(outputPath)
+            // val all_links_query = """
+            //     SELECT 
+            //         dc.a AS dca
+            //         ,dc.b AS dcb
+            //         ,c1.a AS c1a
+            //         ,c1.b AS c1b
+            //         ,c2.a AS c2a
+            //         ,c2.b AS c2b
+            //         ,c3.a AS c3a
+            //         ,c3.b AS c3b
+            //         ,c4.a AS c4a
+            //         ,c4.b AS c4b
+            //     FROM distComb AS dc
+            //     LEFT JOIN citations AS c1
+            //         ON dc.a = c1.a
+            //     LEFT JOIN citations AS c2
+            //         ON c1.b = c2.a 
+            //             AND c1.b != dc.b
+            //     LEFT JOIN citations AS c3
+            //         ON c2.b = c3.a
+            //             AND c2.b != dc.b
+            //     LEFT JOIN citations AS c4
+            //         ON c3.b = c4.a 
+            //             AND c3.b != dc.b
+            //             -- AND dc.b = c4.b
+            // """
+            // val all_links = spark.sql(all_links_query)
+            // all_links.createOrReplaceTempView("all_links")
+            // all_links.show()
+            // // val n_all_links = all_links.count().toInt
+            // // println(s"Number of records in all_links: $n_all_links")
+            // var outputPath = "hdfs:///pa1/graph_diameter_io_03/all_links"
+            // all_links.coalesce(1).write.format("csv").save(outputPath)
 
-            val gd1_q = """
-                SELECT 
-                    dca AS a
-                    ,dcb AS b
-                    ,IF(c1b=dcb, 1, 0) AS g1
-                    ,IF((c1b=dcb OR c2b=dcb), 1, 0) AS g2
-                    ,IF((c1b=dcb OR c2b=dcb OR c3b=dcb), 1, 0) AS g3
-                    ,IF((c1b=dcb OR c2b=dcb OR c3b=dcb OR c4b=dcb), 1, 0) AS g4
-                FROM all_links
-            """
-            val gd1 = spark.sql(gd1_q)
-            gd1.createOrReplaceTempView("gd1")
-            gd1.show()
-            outputPath = "hdfs:///pa1/graph_diameter_io_03/gd1"
-            gd1.coalesce(1).write.format("csv").save(outputPath)
+            // val gd1_q = """
+            //     SELECT 
+            //         dca AS a
+            //         ,dcb AS b
+            //         ,IF(c1b=dcb, 1, 0) AS g1
+            //         ,IF((c1b=dcb OR c2b=dcb), 1, 0) AS g2
+            //         ,IF((c1b=dcb OR c2b=dcb OR c3b=dcb), 1, 0) AS g3
+            //         ,IF((c1b=dcb OR c2b=dcb OR c3b=dcb OR c4b=dcb), 1, 0) AS g4
+            //     FROM all_links
+            // """
+            // val gd1 = spark.sql(gd1_q)
+            // gd1.createOrReplaceTempView("gd1")
+            // gd1.show()
+            // outputPath = "hdfs:///pa1/graph_diameter_io_03/gd1"
+            // gd1.coalesce(1).write.format("csv").save(outputPath)
 
-            val gd2_q = """
-                SELECT
-                    a
-                    ,b
-                    ,MAX(g1) AS g1
-                    ,MAX(g2) AS g2
-                    ,MAX(g3) AS g3
-                    ,MAX(g4) AS g4
-                FROM gd1
-                GROUP BY 
-                    a, b
-            """
-            val gd2 = spark.sql(gd2_q)
-            gd2.createOrReplaceTempView("gd2")
-            gd2.show()
-            outputPath = "hdfs:///pa1/graph_diameter_io_03/gd2"
-            gd2.coalesce(1).write.format("csv").save(outputPath)
+            // val gd2_q = """
+            //     SELECT
+            //         a
+            //         ,b
+            //         ,MAX(g1) AS g1
+            //         ,MAX(g2) AS g2
+            //         ,MAX(g3) AS g3
+            //         ,MAX(g4) AS g4
+            //     FROM gd1
+            //     GROUP BY 
+            //         a, b
+            // """
+            // val gd2 = spark.sql(gd2_q)
+            // gd2.createOrReplaceTempView("gd2")
+            // gd2.show()
+            // outputPath = "hdfs:///pa1/graph_diameter_io_03/gd2"
+            // gd2.coalesce(1).write.format("csv").save(outputPath)
 
             val singleQuery = """
                 WITH all_links AS (
@@ -166,8 +166,8 @@ object Citations2 {
                 SELECT 
                     SUM(g1) AS g1
                     ,SUM(g2) AS g2
-                    ,SUM(g2) AS g3
-                    ,SUM(g2) AS g4
+                    ,SUM(g3) AS g3
+                    ,SUM(g4) AS g4
                 FROM (
                     SELECT
                         a
