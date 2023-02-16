@@ -31,7 +31,7 @@ object Citations2 {
 
         var graph_diameter = spark.emptyDataFrame
 
-        for( year <- 1992 to 1993)
+        for( year <- 1992 to 2002)
         {
             println(s"********* Year : $year **************")
 
@@ -152,7 +152,7 @@ object Citations2 {
             val graph_diameter_py = spark.sql(query)
             // graph_diameter_py.show()
 
-            val outputPathpy = s"hdfs:///pa1/graph_diameter_14_py/$year"
+            val outputPathpy = s"hdfs:///pa1/graph_diameter_15_py/$year"
             graph_diameter_py.write.format("csv").save(outputPathpy)
 
             if (year == 1992) {
@@ -164,7 +164,7 @@ object Citations2 {
         } // for loop end
 
         // graph_diameter.show()
-        val outputPath = "hdfs:///pa1/graph_diameter_14"
+        val outputPath = "hdfs:///pa1/graph_diameter_15"
         graph_diameter.coalesce(1).write.format("csv").save(outputPath)
         // graph_diameter.write.format("csv").save(outputPath)
 
