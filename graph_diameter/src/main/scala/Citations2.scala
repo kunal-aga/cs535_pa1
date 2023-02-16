@@ -11,8 +11,8 @@ object Citations2 {
         import spark.implicits._
         
         // Read Citations from HDFS
-        // var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
-        var cit = spark.read.textFile("hdfs:///pa1/test_data.txt")
+        var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
+        // var cit = spark.read.textFile("hdfs:///pa1/test_data.txt")
         cit = cit.filter(!$"value".contains("#"))
         val citcleaned = cit.withColumn("a", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("b", split(col("value"), "\t").getItem(1).cast("int"))
@@ -37,8 +37,8 @@ object Citations2 {
 
             // Single query and write per year
             val query = s"""
-                WITH nodes AS (SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)),
-                -- WITH nodes AS (SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year),
+                -- WITH nodes AS (SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)),
+                WITH nodes AS (SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year),
                 distComb AS (
                     SELECT 
                         n1.nodeid AS a
