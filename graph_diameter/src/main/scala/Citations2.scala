@@ -150,7 +150,7 @@ object Citations2 {
             val graph_diameter_py = spark.sql(query)
             // graph_diameter_py.show()
 
-            val outputPathpy = s"hdfs:///pa1/graph_diameter_15_py/$year"
+            val outputPathpy = s"hdfs:///pa1/graph_diameter_16_py/$year"
             graph_diameter_py.write.format("csv").save(outputPathpy)
 
             // if (year == 1992) {
