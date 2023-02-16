@@ -187,25 +187,28 @@ object Citations2 {
                 )
                 SELECT
                     '$year' AS year
-                    ,density_level
-                    ,SUM(density) OVER(ORDER BY density_level) AS density_final
+                    ,SUM(IF(density_level <= 1, density, 0)) AS g1
+                    ,SUM(IF(density_level <= 2, density, 0)) AS g2
+                    ,SUM(IF(density_level <= 3, density, 0)) AS g3
+                    ,SUM(IF(density_level <= 4, density, 0)) AS g4
                 FROM (
-                    SELECT 'g1' AS density_level, COUNT(DISTINCT a, b) AS density
+                    SELECT 1 AS density_level, COUNT(DISTINCT a, b) AS density
                     FROM gd1
                     WHERE g1 = 1
                     UNION
-                    SELECT 'g2' AS density_level, COUNT(DISTINCT a, b) AS density
+                    SELECT 2 AS density_level, COUNT(DISTINCT a, b) AS density
                     FROM gd2
                     WHERE g2 = 1
                     UNION
-                    SELECT 'g3' AS density_level, COUNT(DISTINCT a, b) AS density
+                    SELECT 3 AS density_level, COUNT(DISTINCT a, b) AS density
                     FROM gd3
                     WHERE g3 = 1
                     UNION
-                    SELECT 'g4' AS density_level, COUNT(DISTINCT a, b) AS density
+                    SELECT 4 AS density_level, COUNT(DISTINCT a, b) AS density
                     FROM gd4
                     WHERE g4 = 1
                 )
+
             """
             val graph_diameter_py = spark.sql(query)
             // graph_diameter_py.show()
