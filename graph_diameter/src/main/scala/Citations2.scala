@@ -31,49 +31,37 @@ object Citations2 {
 
         // Seq (array) to save stats per year
         // var resultData: Seq[Row] = Seq.empty[Row]
-        var graph_diameter = spark.emptyDataFrame
+        // var graph_diameter = spark.emptyDataFrame
 
         for( year <- 1992 to 1993)
         {
             println(s"********* Year : $year **************")
 
-            // Distinct nodes
-            // test_data
-            // val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)")
-            val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year")
-            nodes.createOrReplaceTempView("nodes")
-
-            // Distinct node combinations 
-            val query = """
-                SELECT 
-                    n1.nodeid AS a
-                    ,n2.nodeid AS b
-                FROM nodes n1
-                JOIN nodes n2 
-                    ON n1.nodeid < n2.nodeid
-            """;
-            val distComb = spark.sql(query)//.persist()
-            // distComb.show()
-            distComb.createOrReplaceTempView("distComb")
-
-            // citations simplified and magnified
-            val query2 = s"""
-                SELECT
-                    n.nodeid AS a
-                    ,IF(n.nodeid=c.a, c.b, c.a) AS b
-                FROM nodes AS n
-                LEFT JOIN citations_all AS c
-                    ON n.nodeid = c.a 
-                        OR n.nodeid = c.b
-            """;
-            val cit_year = spark.sql(query2)//.persist()
-            // cit_year.show()
-            cit_year.createOrReplaceTempView("citations")
-
-
-            //Single query for g(1-4)
-            val singleQuery = s"""
-                WITH all_links AS (
+            // Single query and write per year
+            val query = s"""
+                WITH nodes AS (
+                    SELECT DISTINCT nodeid 
+                    FROM pdates 
+                    WHERE pyear <= $year
+                ),
+                distComb AS (
+                    SELECT 
+                        n1.nodeid AS a
+                        ,n2.nodeid AS b
+                    FROM nodes n1
+                    JOIN nodes n2 
+                        ON n1.nodeid < n2.nodeid                
+                ),
+                citations AS (
+                    SELECT
+                        n.nodeid AS a
+                        ,IF(n.nodeid=c.a, c.b, c.a) AS b
+                    FROM nodes AS n
+                    LEFT JOIN citations_all AS c
+                        ON n.nodeid = c.a 
+                            OR n.nodeid = c.b                
+                ),
+                all_links AS (
                     SELECT 
                         dc.a AS dca
                         ,dc.b AS dcb
@@ -94,7 +82,6 @@ object Citations2 {
                         ON c2.b = c3.a
                     LEFT JOIN citations AS c4
                         ON c3.b = c4.a 
-                        -- AND dc.b = c4.b
                 )
                 SELECT 
                     '$year' AS year
@@ -122,14 +109,107 @@ object Citations2 {
                     )
                     GROUP BY 
                         a, b
-                )
+                )            
             """
-            val graph_diameter_py = spark.sql(singleQuery)
+            val graph_diameter_py = spark.sql(query)
             // graph_diameter_py.show()
-
-            val outputPath = s"hdfs:///pa1/graph_diameter_py/$year"
+            val outputPath = s"hdfs:///pa1/graph_diameter_py_02/$year"
             // graph_diameter_py.coalesce(1).write.format("csv").save(outputPath)
             graph_diameter_py.write.format("csv").save(outputPath)
+
+            // // Distinct nodes
+            // // test_data
+            // // val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)")
+            // val nodes = spark.sql(s"SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year")
+            // nodes.createOrReplaceTempView("nodes")
+
+            // // Distinct node combinations 
+            // val query = """
+            //     SELECT 
+            //         n1.nodeid AS a
+            //         ,n2.nodeid AS b
+            //     FROM nodes n1
+            //     JOIN nodes n2 
+            //         ON n1.nodeid < n2.nodeid
+            // """;
+            // val distComb = spark.sql(query)//.persist()
+            // // distComb.show()
+            // distComb.createOrReplaceTempView("distComb")
+
+            // // citations simplified and magnified
+            // val query2 = s"""
+            //     SELECT
+            //         n.nodeid AS a
+            //         ,IF(n.nodeid=c.a, c.b, c.a) AS b
+            //     FROM nodes AS n
+            //     LEFT JOIN citations_all AS c
+            //         ON n.nodeid = c.a 
+            //             OR n.nodeid = c.b
+            // """;
+            // val cit_year = spark.sql(query2)//.persist()
+            // // cit_year.show()
+            // cit_year.createOrReplaceTempView("citations")
+
+
+            // //Single query for g(1-4)
+            // val singleQuery = s"""
+            //     WITH all_links AS (
+            //         SELECT 
+            //             dc.a AS dca
+            //             ,dc.b AS dcb
+            //             ,c1.a AS c1a
+            //             ,c1.b AS c1b
+            //             ,c2.a AS c2a
+            //             ,c2.b AS c2b
+            //             ,c3.a AS c3a
+            //             ,c3.b AS c3b
+            //             ,c4.a AS c4a
+            //             ,c4.b AS c4b
+            //         FROM distComb AS dc
+            //         LEFT JOIN citations AS c1
+            //             ON dc.a = c1.a
+            //         LEFT JOIN citations AS c2
+            //             ON c1.b = c2.a
+            //         LEFT JOIN citations AS c3
+            //             ON c2.b = c3.a
+            //         LEFT JOIN citations AS c4
+            //             ON c3.b = c4.a 
+            //             -- AND dc.b = c4.b
+            //     )
+            //     SELECT 
+            //         '$year' AS year
+            //         ,SUM(g1) AS g1
+            //         ,SUM(g2) AS g2
+            //         ,SUM(g3) AS g3
+            //         ,SUM(g4) AS g4
+            //     FROM (
+            //         SELECT
+            //             a
+            //             ,b
+            //             ,MAX(g1) AS g1
+            //             ,MAX(g2) AS g2
+            //             ,MAX(g3) AS g3
+            //             ,MAX(g4) AS g4
+            //         FROM (
+            //             SELECT 
+            //                 dca AS a
+            //                 ,dcb AS b
+            //                 ,IF(c1b=dcb, 1, 0) AS g1
+            //                 ,IF((c1b=dcb OR c2b=dcb), 1, 0) AS g2
+            //                 ,IF((c1b=dcb OR c2b=dcb OR c3b=dcb), 1, 0) AS g3
+            //                 ,IF((c1b=dcb OR c2b=dcb OR c3b=dcb OR c4b=dcb), 1, 0) AS g4
+            //             FROM all_links
+            //         )
+            //         GROUP BY 
+            //             a, b
+            //     )
+            // """
+            // val graph_diameter_py = spark.sql(singleQuery)
+            // // graph_diameter_py.show()
+
+            // val outputPath = s"hdfs:///pa1/graph_diameter_py/$year"
+            // // graph_diameter_py.coalesce(1).write.format("csv").save(outputPath)
+            // graph_diameter_py.write.format("csv").save(outputPath)
 
             // append to final output
             // if (year == 1992) {
