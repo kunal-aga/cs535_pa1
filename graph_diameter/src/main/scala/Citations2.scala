@@ -125,7 +125,7 @@ object Citations2 {
                 )
             """
             val graph_diameter_py = spark.sql(singleQuery)
-            graph_diameter_py.show()
+            // graph_diameter_py.show()
 
             // append to final output
             if (year == 1992) {
@@ -249,9 +249,10 @@ object Citations2 {
         // val result = spark.createDataFrame(spark.sparkContext.parallelize(resultData), resultSchema)
         // result.printSchema()
         // result.show()
-        graph_diameter.show()
+        // graph_diameter.show()
         val outputPath = "hdfs:///pa1/graph_diameter_08"
         graph_diameter.coalesce(1).write.format("csv").save(outputPath)
+        // graph_diameter.write.format("csv").save(outputPath)
 
         spark.stop()
     }
