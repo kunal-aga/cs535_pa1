@@ -208,8 +208,8 @@ object Citations2 {
                 )
             """
             val graph_diameter_py = spark.sql(query)
-            graph_diameter_py.show()
-            val outputPath = s"hdfs:///pa1/graph_diameter_py_02/$year"
+            // graph_diameter_py.show()
+            val outputPath = s"hdfs:///pa1/graph_diameter_py_03/$year"
             // graph_diameter_py.coalesce(1).write.format("csv").save(outputPath)
             graph_diameter_py.write.format("csv").save(outputPath)
 
