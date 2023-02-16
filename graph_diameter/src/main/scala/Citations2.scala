@@ -187,8 +187,8 @@ object Citations2 {
             remainingComb.createOrReplaceTempView("remainingComb")
             g3.unpersist()
             val queryg4 = """
-                SELECT COUNT(DISTINCT rc.a, rc.b)
-                -- SELECT DISTINCT rc.a, rc.b
+                -- SELECT COUNT(DISTINCT rc.a, rc.b)
+                SELECT DISTINCT rc.a, rc.b
                 FROM remainingComb AS rc
                 LEFT JOIN citations AS c1
                     ON rc.a = c1.a
@@ -200,11 +200,11 @@ object Citations2 {
                     ON c3.b = c4.a AND c4.b = rc.b
                 WHERE c4.a IS NOT NULL             
             """;
-            val n_g4 = spark.sql(queryg4).first().getLong(0).toInt + n_g3
-            // val g4 = spark.sql(queryg4)
+            // val n_g4 = spark.sql(queryg4).first().getLong(0).toInt + n_g3
+            val g4 = spark.sql(queryg4)
             // g4.show()
             // g4.createOrReplaceTempView("g4")
-            // val n_g4 = g4.count().toInt + n_g3
+            val n_g4 = g4.count().toInt + n_g3
             // val n_g4 = spark.sql("SELECT COUNT(a) FROM g4").first().getLong(0).toInt + n_g3
             println(s"Number of nodes in g(4) in $year year: $n_g4")
 
