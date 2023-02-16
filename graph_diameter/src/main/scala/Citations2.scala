@@ -250,7 +250,7 @@ object Citations2 {
         // result.printSchema()
         // result.show()
         // graph_diameter.show()
-        val outputPath = "hdfs:///pa1/graph_diameter_09"
+        val outputPath = "hdfs:///pa1/graph_diameter_10"
         // graph_diameter.coalesce(1).write.format("csv").save(outputPath)
         graph_diameter.write.format("csv").save(outputPath)
 
