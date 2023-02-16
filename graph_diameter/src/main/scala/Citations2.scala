@@ -11,8 +11,8 @@ object Citations2 {
         import spark.implicits._
         
         // Read Citations from HDFS
-        var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
-        // var cit = spark.read.textFile("hdfs:///pa1/test_data.txt")
+        // var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
+        var cit = spark.read.textFile("hdfs:///pa1/test_data.txt")
         cit = cit.filter(!$"value".contains("#"))
         val citcleaned = cit.withColumn("a", split(col("value"), "\t").getItem(0).cast("int"))
             .withColumn("b", split(col("value"), "\t").getItem(1).cast("int"))
@@ -29,7 +29,7 @@ object Citations2 {
         val pdcleaned2 = pdcleaned.withColumn("pyear", split(col("pdate"), "-").getItem(0).cast("int"))//.persist()
         pdcleaned2.createOrReplaceTempView("pdates")
 
-        // var graph_diameter = spark.emptyDataFrame
+        var graph_diameter = spark.emptyDataFrame
 
         for( year <- 1992 to 1993)
         {
@@ -37,8 +37,8 @@ object Citations2 {
 
             // Single query and write per year
             val query = s"""
-                -- WITH nodes AS (SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)),
-                WITH nodes AS (SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year),
+                WITH nodes AS (SELECT DISTINCT nodeid FROM (SELECT DISTINCT a AS nodeid FROM citations_all UNION SELECT DISTINCT b AS nodeid FROM citations_all)),
+                -- WITH nodes AS (SELECT DISTINCT nodeid FROM pdates WHERE pyear <= $year),
                 distComb AS (
                     SELECT 
                         n1.nodeid AS a
@@ -141,16 +141,22 @@ object Citations2 {
             """
             val graph_diameter_py = spark.sql(query)
             // graph_diameter_py.show()
-            val outputPath = s"hdfs:///pa1/graph_diameter_py_04/$year"
-            // graph_diameter_py.coalesce(1).write.format("csv").save(outputPath)
-            graph_diameter_py.write.format("csv").save(outputPath)
+
+            // val outputPath = s"hdfs:///pa1/graph_diameter_py_04/$year"
+            // graph_diameter_py.write.format("csv").save(outputPath)
+
+            if (year == 1992) {
+                graph_diameter = graph_diameter_py
+            } else {
+                graph_diameter = graph_diameter.union(graph_diameter_py)
+            }
 
         } // for loop end
 
         // graph_diameter.show()
-        // val outputPath = "hdfs:///pa1/graph_diameter_10"
+        val outputPath = "hdfs:///pa1/graph_diameter_test_05"
         // graph_diameter.coalesce(1).write.format("csv").save(outputPath)
-        // graph_diameter.write.format("csv").save(outputPath)
+        graph_diameter.write.format("csv").save(outputPath)
 
         spark.stop()
     }
