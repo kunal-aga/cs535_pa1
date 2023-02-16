@@ -71,6 +71,32 @@ object Citations2 {
 
 
             //Single query for g(1-4)
+            val all_links_query = """
+                SELECT 
+                    dc.a AS dca
+                    ,dc.b AS dcb
+                    ,c1.a AS c1a
+                    ,c1.b AS c1b
+                    ,c2.a AS c2a
+                    ,c2.b AS c2b
+                    ,c3.a AS c3a
+                    ,c3.b AS c3b
+                    ,c4.a AS c4a
+                    ,c4.b AS c4b
+                FROM distComb AS dc
+                LEFT JOIN citations AS c1
+                    ON dc.a = c1.a
+                LEFT JOIN citations AS c2
+                    ON c1.b = c2.a
+                LEFT JOIN citations AS c3
+                    ON c2.b = c3.a
+                LEFT JOIN citations AS c4
+                    ON c3.b = c4.a 
+                    -- AND dc.b = c4.b
+            """
+            val all_links = spark.sql(all_links_query)
+            all_links.show()
+
             val singleQuery = """
                 WITH all_links AS (
                     SELECT 
