@@ -128,8 +128,8 @@ object Citations2 {
             // graph_diameter_py.show()
 
             val outputPath = s"hdfs:///pa1/graph_diameter_py/$year"
-            // graph_diameter.coalesce(1).write.format("csv").save(outputPath)
-            graph_diameter.write.format("csv").save(outputPath)
+            // graph_diameter_py.coalesce(1).write.format("csv").save(outputPath)
+            graph_diameter_py.write.format("csv").save(outputPath)
 
             // append to final output
             // if (year == 1992) {
