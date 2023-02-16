@@ -98,12 +98,46 @@ object Citations2 {
                         -- AND dc.b = c4.b
             """
             val all_links = spark.sql(all_links_query)
-            all_links.show()
-            val n_all_links = all_links.count().toInt
-            println(s"Number of records in all_links: $n_all_links")
-            val outputPath = "hdfs:///pa1/graph_diameter_io_02"
+            all_links.createOrReplaceTempView("all_links")
+            // all_links.show()
+            // val n_all_links = all_links.count().toInt
+            // println(s"Number of records in all_links: $n_all_links")
+            val outputPath = "hdfs:///pa1/graph_diameter_io_03/all_links"
             all_links.coalesce(1).write.format("csv").save(outputPath)
 
+            val gd1_q = """
+                SELECT 
+                    dca AS a
+                    ,dcb AS b
+                    ,IF(c1b=dcb, 1, 0) AS g1
+                    ,IF((c1b=dcb OR c2b=dcb), 1, 0) AS g2
+                    ,IF((c1b=dcb OR c2b=dcb OR c3b=dcb), 1, 0) AS g3
+                    ,IF((c1b=dcb OR c2b=dcb OR c3b=dcb OR c4b=dcb), 1, 0) AS g4
+                FROM all_links
+            """
+            val gd1 = spark.sql(gd1_q)
+            gd1.createOrReplaceTempView("gd1")
+            // gd1.show()
+            val outputPath = "hdfs:///pa1/graph_diameter_io_03/gd1"
+            gd1.coalesce(1).write.format("csv").save(outputPath)
+
+            val gd2_q = """
+                SELECT
+                    a
+                    ,b
+                    ,MAX(g1) AS g1
+                    ,MAX(g2) AS g2
+                    ,MAX(g3) AS g3
+                    ,MAX(g4) AS g4
+                FROM gd1
+                GROUP BY 
+                    a, b
+            """
+            val gd2 = spark.sql(gd2_q)
+            gd2.createOrReplaceTempView("gd2")
+            // gd2.show()
+            val outputPath = "hdfs:///pa1/graph_diameter_io_03/gd2"
+            gd2.coalesce(1).write.format("csv").save(outputPath)
 
             val singleQuery = """
                 WITH all_links AS (
