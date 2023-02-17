@@ -11,7 +11,8 @@ object Citations2 {
         import spark.implicits._
         
         // Read Citations from HDFS
-        var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
+        var cit = spark.read.textFile("hdfs:///pa1/citations.txt") //chakshu's hdfs
+        // var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
         // var cit = spark.read.textFile("hdfs:///pa1/test_data.txt") // test data
         cit = cit.filter(!$"value".contains("#"))
         val citcleaned = cit.withColumn("a", split(col("value"), "\t").getItem(0).cast("int"))
@@ -37,7 +38,7 @@ object Citations2 {
         // Seq (array) to save stats per year
         var resultData: Seq[Row] = Seq.empty[Row]
 
-        for( year <- 1992 to 2002)
+        for( year <- 2001 to 2002)
         {
             // println(s"********* Year : $year **************")
 
@@ -73,38 +74,13 @@ object Citations2 {
                 ) AS c
                     ON n.nodeid = c.a 
                         OR n.nodeid = c.b   
-            """).persist()
+            """)
+            // .repartition(1000)
+            .persist()
             cit_year.createOrReplaceTempView("citations")   
             nodes.unpersist()        
-
-            // // Distinct node combinations 
-            // val query = s"""
-            //     WITH nodes AS (
-            //         SELECT DISTINCT nodeid
-            //         FROM pdates
-            //         WHERE pyear <= $year
-            //     )
-            //     SELECT 
-            //         n1.nodeid AS a
-            //         ,n2.nodeid AS b
-            //     FROM nodes n1
-            //     JOIN nodes n2 
-            //         ON n1.nodeid < n2.nodeid
-            // """;
-            // val distComb = spark.sql(query).persist()
-            // // distComb.show()
-            // distComb.createOrReplaceTempView("distComb")
-
-            // // Subsample citations only till current year
-            // val query2 = s"""
-            //     SELECT c.*
-            //     FROM citations_all AS c
-            //     LEFT JOIN pdates AS pd
-            //         ON c.a = pd.nodeid
-            //     WHERE pd.pyear <= $year
-            // """;
-            // var cit_year = spark.sql(query2).persist()
-            // cit_year.createOrReplaceTempView("citations")
+            // numP = cit_year.rdd.getNumPartitions
+            // println(s"Partitions count of cit_year: $numP")
 
             // g(1)
             val queryg1 = """
@@ -219,6 +195,19 @@ object Citations2 {
 
             // Append stats to result seq
             resultData = resultData :+ Row(year, n_g1, n_g2, n_g3, n_g4)
+
+            // create output DF and export to HDFS
+            val resultSchema = new StructType()
+                .add("year",IntegerType)
+                .add("G1",IntegerType)
+                .add("G2",IntegerType)
+                .add("G3",IntegerType)
+                .add("G4",IntegerType)
+            val result = spark.createDataFrame(spark.sparkContext.parallelize(resultData), resultSchema)
+            result.printSchema()
+            result.show()
+            val outputPath = s"hdfs:///pa1/graph_diameter_18_py/$year"
+            result.coalesce(1).write.format("csv").save(outputPath)
 
         } // for loop end
 
