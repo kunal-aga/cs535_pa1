@@ -11,8 +11,7 @@ object Citations2 {
         import spark.implicits._
         
         // Read Citations from HDFS
-        var cit = spark.read.textFile("hdfs:///pa1/citations.txt") //chakshu's hdfs
-        // var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
+        var cit = spark.read.textFile("hdfs:///pa1/citations.txt")
         // var cit = spark.read.textFile("hdfs:///pa1/test_data.txt") // test data
         cit = cit.filter(!$"value".contains("#"))
         val citcleaned = cit.withColumn("a", split(col("value"), "\t").getItem(0).cast("int"))
@@ -38,7 +37,7 @@ object Citations2 {
         // Seq (array) to save stats per year
         var resultData: Seq[Row] = Seq.empty[Row]
 
-        for( year <- 2001 to 2002)
+        for( year <- 1992 to 2002)
         {
             // println(s"********* Year : $year **************")
 
@@ -79,8 +78,6 @@ object Citations2 {
             .persist()
             cit_year.createOrReplaceTempView("citations")   
             nodes.unpersist()        
-            // numP = cit_year.rdd.getNumPartitions
-            // println(s"Partitions count of cit_year: $numP")
 
             // g(1)
             val queryg1 = """
@@ -121,7 +118,6 @@ object Citations2 {
             // g2.show()
             g2.createOrReplaceTempView("g2")
             val n_g2 = g2.count().toInt + n_g1
-            // val n_g2 = spark.sql("SELECT COUNT(a) FROM g2").first().getLong(0).toInt + n_g1
             println(s"Number of nodes in g(2) in $year year: $n_g2")
 
             // g(3)
@@ -149,7 +145,6 @@ object Citations2 {
             // g3.show()
             g3.createOrReplaceTempView("g3")
             val n_g3 = g3.count().toInt + n_g2
-            // val n_g3 = spark.sql("SELECT COUNT(a) FROM g3").first().getLong(0).toInt + n_g2
             println(s"Number of nodes in g(3) in $year year: $n_g3")
 
             // g(4)
@@ -163,7 +158,6 @@ object Citations2 {
             remainingComb.createOrReplaceTempView("remainingComb")
             g3.unpersist()
             val queryg4 = """
-                -- SELECT COUNT(DISTINCT rc.a, rc.b)
                 SELECT DISTINCT rc.a, rc.b
                 FROM remainingComb AS rc
                 LEFT JOIN citations AS c1
@@ -176,22 +170,14 @@ object Citations2 {
                     ON c3.b = c4.a AND c4.b = rc.b
                 WHERE c4.a IS NOT NULL             
             """;
-            // val n_g4 = spark.sql(queryg4).first().getLong(0).toInt + n_g3
             val g4 = spark.sql(queryg4)
             // g4.show()
             // g4.createOrReplaceTempView("g4")
             val n_g4 = g4.count().toInt + n_g3
-            // val n_g4 = spark.sql("SELECT COUNT(a) FROM g4").first().getLong(0).toInt + n_g3
             println(s"Number of nodes in g(4) in $year year: $n_g4")
 
             // Unpersist cached dataframes
-            // distComb = distComb.unpersist()
-            // remainingComb.unpersist()
             cit_year.unpersist()
-            // g1.unpersist()
-            // g2.unpersist()
-            // g3.unpersist()
-            // g4 = g4.unpersist()
 
             // Append stats to result seq
             resultData = resultData :+ Row(year, n_g1, n_g2, n_g3, n_g4)
@@ -223,7 +209,6 @@ object Citations2 {
         result.show()
         val outputPath = "hdfs:///pa1/graph_diameter_18"
         result.coalesce(1).write.format("csv").save(outputPath)
-        // result.write.format("csv").save(outputPath)
 
         spark.stop()
     }
